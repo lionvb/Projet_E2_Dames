@@ -24,7 +24,7 @@ Black = 3
 Black_lady = 4
 
 class Board():
-    def __init__(self, grille, deplacement, capture):
+    def __init__(self):
         self.matrice = [
             [3, 0, 3, 0, 3, 0, 3, 0, 3, 0],
             [0, 3, 0, 3, 0, 3, 0, 3, 0, 3],
@@ -39,12 +39,10 @@ class Board():
         ]
 
     def get_piece(self, r, c):
-        return self.matrix[r][c]
+        return self.matrice[r][c]
 
     def set_piece(self, r, c, value):
-        self.matrix[r][c] = value
-
-
+        self.matrice[r][c] = value
 
 
 class Game():
@@ -55,9 +53,9 @@ class Game():
 
     def switch_turn(self):  #Fonction pour changer de joueur 
         if self.current_player == White:
-            self.current_player == Black
+            self.current_player = Black
         else:
-            self.current_player = WHITE 
+            self.current_player = White
 
     def get_possible_captures(self, r, c): 
         # Va retourner toutes les captures possibles sous la forme
@@ -95,7 +93,7 @@ class Game():
             if piece in (Black, Black_lady) and enemy_piece not in (White, White_lady):
                 continue
 
-            if board[jump_r, jump_c] != 0: # La case est libre
+            if board[jump_r][jump_c] != 0: # La case est libre
                 continue
             
             moves.append((jump_r, jump_c, enemy_r, enemy_c))
