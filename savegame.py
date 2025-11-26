@@ -1,5 +1,6 @@
 from pymongo import*
-client=MongoClient('mongodb://localhost:27017')
+url = "mongodb+srv://botdiscord:botdiscord2025@databasejeu.sklp0ra.mongodb.net/?appName=databasejeu"
+client=MongoClient(url)
 db=client["Jeu_de_dames"]
 Games=db["Games"]
 i=count = Games.count_documents({})
@@ -22,6 +23,6 @@ class Partie:
         return self.dic
 Parti=Partie(i)
 Parti.coups("G:B8")
+#Games.delete_one({"Name":"Partie "})
+#Games.insert_one(Parti.dic()) #test 
 print(Parti.dic())
-#Games.delete_one({"Name":"Partie"})
-#Games.insert_one(Parti.__dic__()) #test 
