@@ -1,7 +1,7 @@
 import os
 import json
 from groq import Groq 
-from game import * # Importe les classes Piece, Board, Game, etc.
+from game import * 
 
 # --- Constantes du Jeu ---
 White = 1
@@ -9,7 +9,6 @@ White_lady = 2
 Black = 3
 Black_lady = 4
 
-# La clé codée en dur (utilisée si la variable d'environnement n'est pas trouvée)
 DEFAULT_GROQ_API_KEY = "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"
 
 # --- Initialisation du Client Groq ---
@@ -27,9 +26,9 @@ try:
 
 except Exception as e:
     print(f"Erreur lors de l'initialisation du client Groq : {e}")
-    client = None # Le bot ne fonctionnera pas
+    client = None
 
-# --- Prompts du LLM (Groq) ---
+
 SYSTEM_PROMPT_FR = (
     "Vous êtes un joueur de dames internationales (10x10) de classe mondiale. "
     "Votre tâche est d'analyser l'état actuel du plateau et de suggérer le meilleur coup à jouer. "
@@ -57,7 +56,6 @@ if __name__ == "__main__":
 
     # L'IA (Groq) joue le premier coup (Blancs)
     if my_game.current_player == White:
-        # 🟢 CORRECTION : Passer client et SYSTEM_PROMPT_FR en arguments
         result_white = my_game.llm_move(client, SYSTEM_PROMPT_FR) 
         print(f"\nCouleur jouée: Blanc\nRésultat: {result_white}")
 
@@ -67,7 +65,6 @@ if __name__ == "__main__":
     
     # L'IA (Groq) joue le tour des Noirs
     if my_game.current_player == Black:
-        # 🟢 CORRECTION : Passer client et SYSTEM_PROMPT_FR en arguments
         result_black = my_game.llm_move(client, SYSTEM_PROMPT_FR) 
         print(f"\nCouleur jouée: Noir\nRésultat: {result_black}")
 
