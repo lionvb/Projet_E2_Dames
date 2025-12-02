@@ -191,15 +191,60 @@ class Game():
             return "Capture effectuée"
         else:
             return "Le déplacement n'est pas autorisé"
-
-
-        
-
-
-
-
-
-
+#-------------------------------------------------------------------------------
     
+    def llm_move(self, groq_client, system_prompt):
+        """Demande à l'IA (via Groq) un coup et l'exécute."""
+        
+        # 1. Vérification du client (pas besoin de global)
+        if groq_client is None:
+            print("Client Groq non initialisé. Impossible de demander le coup.")
+            return "Échec de l'obtention du coup (Client Groq absent)"
+
+        player_color = "Blanc (W/Wk)" if self.current_player == White else "Noir (B/Bk)"
+        
+        # Construction du USER PROMPT (état du jeu)
+        user_prompt = (
+            f"Le joueur actuel est : {player_color}. "
+            "Voici la grille actuelle du plateau :\n"
+            f"{str(self.board)}"
+        )
+        
+        print(f"-> Consultation de l'IA Groq pour le joueur {player_color}...")
+        
+        try:
+            # Appel à l'API Groq (utilisation de groq_client et system_prompt)
+            response = groq_client.chat.completions.create(
+                model="mixtral-8x7b-32768", 
+                messages=[
+                    {"role": "system", "content": system_prompt}, 
+                    {"role": "user", "content": user_prompt}
+                ],
+                response_format={"type": "json_object"} 
+            )
+            
+            # ... (Le reste du code de parsing et d'exécution reste le même) ...
+            response_text = response.choices[0].message.content
+            move_data = json.loads(response_text)
+            
+            r1 = move_data.get('r1')
+            c1 = move_data.get('c1')
+            r2 = move_data.get('r2')
+            c2 = move_data.get('c2')
+            
+            if not all(isinstance(coord, int) for coord in [r1, c1, r2, c2]):
+                raise ValueError(f"Le format JSON de l'IA est incorrect ou incomplet: {response_text}")
+
+            print(f"L'IA Groq suggère le coup : ({r1}, {c1}) -> ({r2}, {c2})")
+            
+            result = self.moves(r1, c1, r2, c2)
+            
+            print(f"Résultat de l'exécution: {result}")
+            return result
+        
+        except Exception as e:
+            print(f"❌ Erreur lors de l'appel ou du traitement de l'IA Groq : {e}")
+            return "Échec de l'obtention du coup de l'IA Groq"
+        
 
 
