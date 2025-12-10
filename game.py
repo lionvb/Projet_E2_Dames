@@ -234,7 +234,7 @@ class Game():
             print("Client Groq non initialisé. Impossible de demander le coup.")
             return "Échec de l'obtention du coup (Client Groq absent)"
 
-        player_color = "Blanc (W/Wk)" if self.current_player == White else "Noir (B/Bk)"
+        player_color = "Blanc (W/Wk)" if self.current_player == "White" else "Noir (B/Bk)"
         
         # Construction du USER PROMPT (état du jeu)
         user_prompt = (
