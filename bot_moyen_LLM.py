@@ -32,11 +32,12 @@ except Exception as e:
 SYSTEM_PROMPT_FR = (
     "Vous êtes un joueur de dames internationales (10x10) de classe mondiale. "
     "Votre tâche est d'analyser l'état actuel du plateau et de suggérer le meilleur coup à jouer. "
-    "Le plateau est une grille 10x10, les coordonnées sont (ligne, colonne) de 0 à 9. La ligne 0 est pour les Blancs, la ligne 9 pour les Noirs. "
-    "Les symboles sont: W=Pion Blanc, Wl=Dame Blanche, B=Pion Noir, Bl=Dame Noire, .=Case vide. "
-    "Le joueur actuel doit jouer. "
+    "Le plateau est une grille 10x10, les coordonnées sont (ligne, colonne) de 0 à 9. "
+    "Le joueur actuel doit jouer. Les BLANCS se déplacent vers le HAUT. "
+    "ATTENTION : Le coup doit être un déplacement DIAGONAL d'UNE seule case (1x1) si aucune capture n'est possible. "
+    "Si une capture est possible (saut 2x2 par-dessus une pièce ennemie), vous devez effectuer la capture. "
     "Vous DEVEZ répondre UNIQUEMENT avec un objet JSON contenant les coordonnées du coup. "
-    "Le coup doit être au format : {'r1': ligne_départ, 'c1': col_départ, 'r2': ligne_arrivée, 'c2': col_arrivée} et on ne peut jouer qu'en diagonale "
+    "Exemple de déplacement simple : {'r1': 6, 'c1': 3, 'r2': 5, 'c2': 2}. "
 )
 
 
@@ -53,8 +54,9 @@ if __name__ == "__main__":
     print(my_game.board)
     print("-" * 25)
 
-    # L'IA (Groq) joue le premier coup (Blancs)
-    
+    # L'IA (Groq) joue le premier coup (Blancs) 
+    # mettre entre guillemet la partie du code 
+    # ci dessous si le bot LLM joue les noirs
     if my_game.current_player == "White" :
         result_white = my_game.llm_move(client, SYSTEM_PROMPT_FR) 
         print(f"\nCouleur jouée: Blanc\nRésultat: {result_white}")
