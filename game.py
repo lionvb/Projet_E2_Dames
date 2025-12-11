@@ -1,3 +1,6 @@
+import json
+
+
 column={"A":0,"B":1,"C":2,"D":3,"E":4,"F":5,"G":6,"H":7,"I":8,"J":9}
 piece_dic={"pw":"White","dw":"White_lady","pb":"Black","db":"Black_lady","vw":"Vide_White","vb":"Vide_brown"}
 inv_piece_dic={'White': 'pw', 'White_lady': 'dw', 'Black': 'pb', 'Black_lady': 'db', 'Vide_White': 'vw', 'Vide_brown': 'vb'}
@@ -240,7 +243,7 @@ class Game():
         else:
             return None
         
-    import json
+
 
     def llm_move(self, groq_client, system_prompt):
         """Demande à l'IA (via Groq) un coup et l'exécute."""
