@@ -65,6 +65,25 @@ class Board():
     def set_piece(self, r, c, value):
         self.matrice[r][c] = inv_piece_dic[value]
 
+    def __str__(self):
+        # Mappage des codes internes aux symboles attendus par l'IA (W, Wl, B, Bl, .)
+        mapping = {
+            "pw": "W",
+            "dw": "Wl",
+            "pb": "B",
+            "db": "Bl",
+            "vw": ".", # Case vide blanche
+            "vb": ".", # Case vide marron
+        }
+        
+        board_str = ""
+        # self.matrice est une liste de tuples ou de listes représentant les lignes
+        for row in self.matrice:
+            # Joindre les symboles, séparés par un espace
+            board_str += " ".join(mapping.get(cell, '?') for cell in row)
+            board_str += "\n"
+            
+        return board_str.strip() # Renvoie la chaîne de caractères formatée
 
 class Game():
     def __init__(self):
@@ -220,12 +239,7 @@ class Game():
             return board
         else:
             return None
-
-
         
-
-#-------------------------------------------------------------------------------
-    
     def llm_move(self, groq_client, system_prompt):
         """Demande à l'IA (via Groq) un coup et l'exécute."""
 
@@ -267,11 +281,6 @@ class Game():
             
             if not all(isinstance(coord, int) for coord in [r1, c1, r2, c2]):
                 raise ValueError(f"Le format JSON de l'IA est incorrect ou incomplet: {response_text}")
-
-
-
-
-
     
             print(f"L'IA Groq suggère le coup : ({r1}, {c1}) -> ({r2}, {c2})")
             
