@@ -36,8 +36,7 @@ SYSTEM_PROMPT_FR = (
     "Les symboles sont: W=Pion Blanc, Wl=Dame Blanche, B=Pion Noir, Bl=Dame Noire, .=Case vide. "
     "Le joueur actuel doit jouer. "
     "Vous DEVEZ répondre UNIQUEMENT avec un objet JSON contenant les coordonnées du coup. "
-    "Le coup doit être au format : {'r1': ligne_départ, 'c1': col_départ, 'r2': ligne_arrivée, 'c2': col_arrivée}. "
-    "N'ajoutez aucune autre explication."
+    "Le coup doit être au format : {'r1': ligne_départ, 'c1': col_départ, 'r2': ligne_arrivée, 'c2': col_arrivée} et on ne peut jouer qu'en diagonale "
 )
 
 
@@ -55,13 +54,16 @@ if __name__ == "__main__":
     print("-" * 25)
 
     # L'IA (Groq) joue le premier coup (Blancs)
+    
     if my_game.current_player == "White" :
         result_white = my_game.llm_move(client, SYSTEM_PROMPT_FR) 
         print(f"\nCouleur jouée: Blanc\nRésultat: {result_white}")
+    
 
     print("\n--- Plateau Après le Coup de l'IA (Blanc) ---")
     print(my_game.board)
     print("-" * 25)
+    
     
     # L'IA (Groq) joue le tour des Noirs
     if my_game.current_player == "Black" :
