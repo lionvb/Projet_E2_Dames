@@ -241,7 +241,7 @@ class Game():
             return None
         
     import json
-    
+
     def llm_move(self, groq_client, system_prompt):
         """Demande à l'IA (via Groq) un coup et l'exécute."""
 
@@ -264,7 +264,7 @@ class Game():
         try:
             # Appel à l'API Groq (utilisation de groq_client et system_prompt)
             response = groq_client.chat.completions.create(
-                model="mixtral-8x7b-32768", 
+                model="llama3-70b-8192", 
                 messages=[
                     {"role": "system", "content": system_prompt}, 
                     {"role": "user", "content": user_prompt}
@@ -292,7 +292,7 @@ class Game():
             return result
         
         except Exception as e:
-            print(f"❌ Erreur lors de l'appel ou du traitement de l'IA Groq : {e}")
+            print(f"Erreur lors de l'appel ou du traitement de l'IA Groq : {e}")
             return "Échec de l'obtention du coup de l'IA Groq"
         
 
