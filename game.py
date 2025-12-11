@@ -41,7 +41,7 @@ class Board():
             ["vw","pw","vw","pw","vw","pw","vw","pw","vw","pw"],\
             ["pw","vw","pw","vw","pw","vw","pw","vw","pw","vw"],\
             ["vw","pw","vw","pw","vw","pw","vw","pw","vw","pw"]]"""#Matrice pour vrai jeu
-        """self.matrice= [
+        self.matrice= [
             ["pb","vw","pb","vw","pb","vw","pb","vw","pb","vw"],\
             ["vw","pb","vw","pb","vw","pb","vw","pb","vw","pb"],\
             ["pb","vw","pb","vw","pb","vw","pb","vw","pb","vw"],\
@@ -51,8 +51,8 @@ class Board():
             ["vb","vw","pw","vw","pw","vw","pw","vw","pw","vw"],\
             ["vw","pw","vw","vb","vw","pw","vw","pw","vw","pw"],\
             ["pw","vw","pw","vw","pw","vw","pw","vw","pw","vw"],\
-            ["vw","pw","vw","pw","vw","pw","vw","pw","vw","pw"]]"""#matrice test double capture
-        self.matrice=["vb","vw","vb","vw","vb","vw","vb","vw","vb","vw"],\
+            ["vw","pw","vw","pw","vw","pw","vw","pw","vw","pw"]]#matrice test double capture
+        """self.matrice=["vb","vw","vb","vw","vb","vw","vb","vw","vb","vw"],\
             ["vw","vb","vw","vb","vw","vb","vw","vb","vw","vb"],\
             ["vb","vw","vb","vw","vb","vw","vb","vw","vb","vw"],\
             ["vw","vb","vw","vb","vw","vb","vw","vb","vw","vb"],\
@@ -61,7 +61,7 @@ class Board():
             ["vb","vw","vb","vw","pw","vw","vb","vw","vb","vw"],\
             ["vw","vb","vw","pb","vw","vb","vw","vb","vw","vb"],\
             ["vb","vw","pw","vw","vb","vw","vb","vw","vb","vw"],\
-            ["vw","vb","vw","vb","vw","vb","vw","vb","vw","vb"]#matrice pour promotion et win
+            ["vw","vb","vw","vb","vw","vb","vw","vb","vw","vb"]"""#matrice pour promotion et win
     def get_piece(self, r, c):
         return piece_dic[self.matrice[r][c]]
 
@@ -170,7 +170,7 @@ class Game():
         if (piece in ("White", "White_lady") and self.current_player != "White") or (piece in ("Black", "Black_lady") and self.current_player != "Black"):
             return "Ce n'est pas à toi de jouer"
         
-        if piece_dic[board[r2][c2]] not in ("Vide_brown","Vide_white"):
+        if piece_dic.get(board[r2][c2]) not in ("Vide_brown","Vide_white"):
             return "La case d'arrivée n'est pas vide"
 
         dr = r2 - r1
