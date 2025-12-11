@@ -240,6 +240,8 @@ class Game():
         else:
             return None
         
+    import json
+    
     def llm_move(self, groq_client, system_prompt):
         """Demande à l'IA (via Groq) un coup et l'exécute."""
 
