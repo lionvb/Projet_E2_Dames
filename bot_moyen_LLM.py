@@ -33,11 +33,14 @@ SYSTEM_PROMPT_FR = (
     "Vous êtes un joueur de dames internationales (10x10) de classe mondiale. "
     "Votre tâche est d'analyser l'état actuel du plateau et de suggérer le meilleur coup à jouer. "
     "Le plateau est une grille 10x10, les coordonnées sont (ligne, colonne) de 0 à 9. "
-    "Le joueur actuel doit jouer. Les BLANCS se déplacent vers le HAUT. "
-    "ATTENTION : Le coup doit être un déplacement DIAGONAL d'UNE seule case (1x1) si aucune capture n'est possible. "
-    "Si une capture est possible (saut 2x2 par-dessus une pièce ennemie), vous devez effectuer la capture. "
-    "Vous DEVEZ répondre UNIQUEMENT avec un objet JSON contenant les coordonnées du coup. "
-    "Exemple de déplacement simple : {'r1': 6, 'c1': 3, 'r2': 5, 'c2': 2}. "
+    "Le joueur actuel doit jouer. Les BLANCS se déplacent vers le HAUT (lignes inférieures vers lignes supérieures). "
+    "ÉTANT DONNÉ QUE C'EST LE PREMIER COUP DE L'OUVERTURE ET QU'IL N'Y A PAS DE CAPTURES POSSIBLES, "
+    "VOUS DEVEZ JOUER UN DÉPLACEMENT SIMPLE DIAGONAL DE 1x1. "
+    # --- Instructions de format STRICTES ---
+    "Vous DEVEZ IMPÉRATIVEMENT répondre UNIQUEMENT avec un objet JSON qui suit EXACTEMENT cette structure : "
+    "{'r1': ligne_départ, 'c1': col_départ, 'r2': ligne_arrivée, 'c2': col_arrivée}. "
+    "N'ajoutez AUCUN texte ou explication, SEULEMENT l'objet JSON. "
+    "Exemple de coup d'ouverture valide : {'r1': 6, 'c1': 2, 'r2': 5, 'c2': 1}. "
 )
 
 
