@@ -33,16 +33,24 @@ SYSTEM_PROMPT_FR = (
     "Vous êtes un joueur de dames internationales (10x10) de classe mondiale. "
     "Votre tâche est d'analyser l'état actuel du plateau et de suggérer le meilleur coup à jouer. "
     "Le plateau est une grille 10x10, les coordonnées sont (ligne, colonne) de 0 à 9. "
-    "Le joueur actuel doit jouer. Les BLANCS se déplacent vers le HAUT (lignes inférieures vers lignes supérieures). "
+    
+    # 🎯 Accent mis sur le joueur : BLANC
+    "Le joueur actuel est UNIQUEMENT BLANC (W). Les pièces BLANCHES se trouvent aux LIGNES 6, 7, 8 et 9. "
+    "Elles doivent se déplacer vers le HAUT (lignes inférieures vers lignes supérieures) et en DIAGONALE. "
+    
+    "ATTENTION : Les DAMES se jouent uniquement en DIAGONALE ! Pour un coup de pion 1x1, cela signifie que le déplacement (r1, c1) -> (r2, c2) DOIT AVOIR |r1-r2| = 1 et |c1-c2| = 1. "
+    
     "ÉTANT DONNÉ QUE C'EST LE PREMIER COUP DE L'OUVERTURE ET QU'IL N'Y A PAS DE CAPTURES POSSIBLES, "
-    "VOUS DEVEZ JOUER UN DÉPLACEMENT SIMPLE DIAGONAL DE 1x1. "
-    # --- Instructions de format STRICTES ---
-    "Vous DEVEZ IMPÉRATIVEMENT répondre UNIQUEMENT avec un objet JSON qui suit EXACTEMENT cette structure : "
+    "VOUS DEVEZ JOUER UN DÉPLACEMENT SIMPLE DIAGONAL DE 1x1, en bougeant un pion de la LIGNE 6 vers la LIGNE 5. "
+    
+    "Vous DEVEZ répondre UNIQUEMENT avec un objet JSON qui suit EXACTEMENT cette structure : "
     "{'r1': ligne_départ, 'c1': col_départ, 'r2': ligne_arrivée, 'c2': col_arrivée}. "
-    "N'ajoutez AUCUN texte ou explication, SEULEMENT l'objet JSON. "
-    "Exemple de coup d'ouverture valide : {'r1': 6, 'c1': 2, 'r2': 5, 'c2': 1}. "
+    
+    # Exemple d'un coup valide sur la ligne 6 vers la ligne 5 (qui doit être vide)
+    "Exemple de coup d'ouverture valide pour les BLANCS : {'r1': 6, 'c1': 0, 'r2': 5, 'c2': 1}. " 
+    
+    "N'ajoutez AUCUN texte ou explication, SEULEMENT l'objet JSON."
 )
-
 
 
 # ----------------------------------------------------------------------
@@ -69,11 +77,21 @@ if __name__ == "__main__":
     print(my_game.board)
     print("-" * 25)
     
-    
-    # L'IA (Groq) joue le tour des Noirs
+ # L'IA (Groq) joue le tour des Noirs
     if my_game.current_player == "Black" :
-        result_black = my_game.llm_move(client, SYSTEM_PROMPT_FR) 
-        print(f"\nCouleur jouée: Noir\nRésultat: {result_black}")
+        # --- BLOC JOUEUR HUMAIN (NOIR) ---
+        print("\n--- C'EST À VOUS DE JOUER (NOIR) ---")
+        
+        # Vous pouvez demander les coordonnées en ligne de commande :
+        move_input = input("Entrez votre coup (r1,c1,r2,c2): ")
+        try:
+            r1, c1, r2, c2 = map(int, move_input.split(','))
+            result_black = my_game.moves(r1, c1, r2, c2)
+            print(f"Résultat du coup Noir: {result_black}")
+        except:
+            print("Entrée invalide. Le jeu doit être redémarré.")
+            result_black = "Échec du coup humain"
+        # ------------------------------------
 
     print("\n--- Plateau Après le Coup de l'IA (Noir) ---")
     print(my_game.board)
