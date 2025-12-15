@@ -30,6 +30,30 @@ brown_positions = [(1,1),(3,1),(5,1),(7,1),(9,1),
 
 class Board():
     def __init__(self):
+        self.matrice = [
+            # L0 (Pb) : Pair = Pb
+            ["pb","vw","pb","vw","pb","vw","pb","vw","pb","vw"],
+            # L1 (Pb) : Impair = Pb
+            ["vw","pb","vw","pb","vw","pb","vw","pb","vw","pb"],
+            # L2 (Pb) : Pair = Pb
+            ["pb","vw","pb","vw","pb","vw","pb","vw","pb","vw"],
+            # L3 (Pb) : Impair = Pb
+            ["vw","pb","vw","pb","vw","pb","vw","pb","vw","pb"],
+            
+            # L4 (Vide)
+            ["vb","vw","vb","vw","vb","vw","vb","vw","vb","vw"],
+            # L5 (Vide)
+            ["vw","vb","vw","vb","vw","vb","vw","vb","vw","vb"],
+            
+            # L6 (Pw) : Pair = Pw
+            ["pw","vw","pw","vw","pw","vw","pw","vw","pw","vw"], # <--- [6][5] DOIT ÊTRE vw
+            # L7 (Pw) : Impair = Pw
+            ["vw","pw","vw","pw","vw","pw","vw","pw","vw","pw"],
+            # L8 (Pw) : Pair = Pw
+            ["pw","vw","pw","vw","pw","vw","pw","vw","pw","vw"],
+            # L9 (Pw) : Impair = Pw
+            ["vw","pw","vw","pw","vw","pw","vw","pw","vw","pw"]
+        ]
         """self.matrice= [
             ["pb","vw","pb","vw","pb","vw","pb","vw","pb","vw"],\
             ["vw","pb","vw","pb","vw","pb","vw","pb","vw","pb"],\
@@ -40,8 +64,8 @@ class Board():
             ["pw","vw","pw","vw","pw","vw","pw","vw","pw","vw"],\
             ["vw","pw","vw","pw","vw","pw","vw","pw","vw","pw"],\
             ["pw","vw","pw","vw","pw","vw","pw","vw","pw","vw"],\
-            ["vw","pw","vw","pw","vw","pw","vw","pw","vw","pw"]]"""#Matrice pour vrai jeu
-        self.matrice= [
+            ["vw","pw","vw","pw","vw","pw","vw","pw","vw","pw"]]#Matrice pour vrai jeu"""
+        """self.matrice= [
             ["pb","vw","pb","vw","pb","vw","pb","vw","pb","vw"],\
             ["vw","pb","vw","pb","vw","pb","vw","pb","vw","pb"],\
             ["pb","vw","pb","vw","pb","vw","pb","vw","pb","vw"],\
@@ -51,7 +75,7 @@ class Board():
             ["vb","vw","pw","vw","pw","vw","pw","vw","pw","vw"],\
             ["vw","pw","vw","vb","vw","pw","vw","pw","vw","pw"],\
             ["pw","vw","pw","vw","pw","vw","pw","vw","pw","vw"],\
-            ["vw","pw","vw","pw","vw","pw","vw","pw","vw","pw"]]#matrice test double capture
+            ["vw","pw","vw","pw","vw","pw","vw","pw","vw","pw"]]"""#matrice test double capture
         """self.matrice=["vb","vw","vb","vw","vb","vw","vb","vw","vb","vw"],\
             ["vw","vb","vw","vb","vw","vb","vw","vb","vw","vb"],\
             ["vb","vw","vb","vw","vb","vw","vb","vw","vb","vw"],\
@@ -101,6 +125,19 @@ class Game():
             self.current_player = "Black"
         else:
             self.current_player = "White"
+
+
+    def get_empty_code(self, r, c):
+        # Utilise l'indexation 1-10 pour vérifier si la position est 'white_positions'
+        pos_1_10 = (r + 1, c + 1)
+        # Si la position n'est ni blanche, ni marron (cas d'erreur), on suppose 'vb'
+        if pos_1_10 in white_positions:
+            return "vw"
+        elif pos_1_10 in brown_positions:
+            return "vb"
+        # Pour les cases non jouables ou hors limite, nous retournons une couleur par défaut
+        return "vb"
+    
 
     def get_possible_captures(self, r, c): 
         print(r,c)
@@ -185,9 +222,11 @@ class Game():
                 return "Les pions noirs vont vers le bas du plateau sauf si vous êtes une dame"
 
             # Déplacements
-            
-            board[r1][c1] = "vw" if (r1,c1) in white_positions else "vb" #Case de la où l'on vient devient vide
-            board[r2][c2] = inv_piece_dic.get(piece) # Nouvelle case occupée par le pion
+
+            board[r1][c1] = self.get_empty_code(r1, c1) 
+            board[r2][c2] = inv_piece_dic.get(piece)
+            #board[r1][c1] = "vw" if (r1,c1) in white_positions else "vb" #Case de la où l'on vient devient vide
+            #board[r2][c2] = inv_piece_dic.get(piece) # Nouvelle case occupée par le pion
 
             self.promote_if_needed(r2, c2)  # Si la case d'arrivée est une case du bout du plateau"
 
@@ -206,9 +245,11 @@ class Game():
                 return "Pas de pièce à capturer"
             if piece in ("Black", "Black_lady") and middle_piece not in ("White", "White_lady"):
                 return "Pas de pièce à capturer"
-        
-            board[r1][c1] = "vw" if (r1,c1) in white_positions else "vb" #Case de la où on vient devient vide
-            board[mid_r][mid_c] = "vw" if (r1,c1) in white_positions else "vb" #SI l'on a manger un pion la case devient vide car le pion est retiré
+
+            board[r1][c1] = self.get_empty_code(r1, c1)
+            board[mid_r][mid_c] = self.get_empty_code(mid_r, mid_c)
+            #board[r1][c1] = "vw" if (r1,c1) in white_positions else "vb" #Case de la où on vient devient vide
+            #board[mid_r][mid_c] = "vw" if (r1,c1) in white_positions else "vb" #SI l'on a manger un pion la case devient vide car le pion est retiré
             board[r2][c2] = inv_piece_dic.get(piece) # Nouvelle case occupé par le pion
 
             self.promote_if_needed(r2, c2)  # Si pendant que l'on mange on arrive au bout du board
@@ -227,8 +268,10 @@ class Game():
                 next_r, next_c, eat_r, eat_c = next_caps[0]
 
                 #Exécution de la capture suivante
-                board[current_r][current_c] = "vw" if (r1,c1) in white_positions else "vb"
-                board[eat_r][eat_c] = "vw" if (r1,c1) in white_positions else "vb"
+                board[current_r][current_c] = self.get_empty_code(current_r, current_c)
+                board[eat_r][eat_c] = self.get_empty_code(eat_r, eat_c)
+                #board[current_r][current_c] = "vw" if (r1,c1) in white_positions else "vb"
+                #board[eat_r][eat_c] = "vw" if (r1,c1) in white_positions else "vb"
                 board[next_r][next_c] = inv_piece_dic.get(piece)
 
                 current_r, current_c = next_r, next_c
@@ -288,6 +331,12 @@ class Game():
                 raise ValueError(f"Le format JSON de l'IA est incorrect ou incomplet: {response_text}")
     
             print(f"L'IA Groq suggère le coup : ({r1}, {c1}) -> ({r2}, {c2})")
+
+            try:
+                piece_at_dest = self.board.matrice[r2][c2]
+                print(f"DEBUG: Contenu réel de la case d'arrivée ({r2}, {c2}): {piece_at_dest}")
+            except (IndexError, TypeError):
+                print("DEBUG: Coordonnées d'arrivée hors limites ou invalides.")
             
             result = self.moves(r1, c1, r2, c2)
             
@@ -297,11 +346,3 @@ class Game():
         except Exception as e:
             print(f"Erreur lors de l'appel ou du traitement de l'IA Groq : {e}")
             return "Échec de l'obtention du coup de l'IA Groq"
-        
-
-
-
-
-    
-
-
