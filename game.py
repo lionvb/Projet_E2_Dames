@@ -65,7 +65,21 @@ class Game():
             self.current_player = "Black"
         else:
             self.current_player = "White"
- 
+    
+    def blackwin(m):
+        for i in m:
+            for j in i:
+                if j == "pw" or j == "dw":
+                    return False
+        return True
+    
+    def whitewin(m):
+        for i in m:
+            for j in i:
+                if j == "pb" or j == "db":
+                    return False
+        return True
+    
     def promote_if_needed(self, r, c):
         """Promotion automatique"""
         piece = self.board.get_piece(r, c)
@@ -177,6 +191,8 @@ class Game():
  
         if piece_dic[board[r2][c2]] not in ("Vide_brown","Vide_White"):
             return "La case d'arrivée n'est pas vide"
+        if self.winner!=None:
+            return "La partie est fini, aucun mouvement peut être réalisé"
  
         dr = r2 - r1
         dc = c2 - c1
@@ -230,6 +246,12 @@ class Game():
             board[next_r][next_c] = inv_piece_dic.get(piece)
             cur_r, cur_c = next_r, next_c
             self.promote_if_needed(cur_r, cur_c)
+        if self.blackwin(self.matrice):
+            self.winner="Black"
+            print("les noirs gagnent")
+        if self.whitewin(self.matrice):
+            self.winner="White"
+            print("les blancs gagnent")
  
         self.switch_turn()
         return board
