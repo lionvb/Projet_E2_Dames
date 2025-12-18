@@ -1,77 +1,92 @@
 import json
-from game import Game # Assurez-vous que la classe Game est importée correctement
-from ai_player import DraughtsAI # Importation du nouveau module IA
+from groq import Groq
+from game import *
 
-def execute_ai_turn(game_instance: Game, ai_instance: DraughtsAI):
-    """Exécute le tour de l'IA."""
-    move_data = ai_instance.get_ai_move_data(game_instance)
-    
-    if move_data is None:
-        print("L'IA n'a pas pu suggérer de coup valide.")
-        return
 
-    r1 = move_data.get('r1')
-    c1 = move_data.get('c1')
-    r2 = move_data.get('r2')
-    c2 = move_data.get('c2')
-    
-    print(f"L'IA Groq suggère le coup : ({r1}, {c1}) -> ({r2}, {c2})")
+# --- Constantes du Jeu ---
+White = 1
+White_lady = 2
+Black = 3
+Black_lady = 4
 
-    # (Optionnel) Débogage : afficher la pièce à destination avant de jouer
-    try:
-        piece_at_dest = game_instance.board.matrice[r2][c2]
-        print(f"DEBUG: Contenu réel de la case d'arrivée ({r2}, {c2}): {piece_at_dest}")
-    except (IndexError, TypeError):
-        print("DEBUG: Coordonnées d'arrivée hors limites ou invalides.")
+DEFAULT_GROQ_API_KEY = "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"
 
-    # Exécution du coup
-    result = game_instance.moves(r1, c1, r2, c2)
-    print(f"Résultat de l'exécution: {result}")
-    print(f"\nCouleur jouée: {game_instance.current_player}\nRésultat: {result}")
-    
-    return result
+# --- Initialisation du Client Groq ---
 
-def execute_human_turn(game_instance: Game):
-    """Exécute le tour du joueur humain."""
-    print("\n--- C'EST À VOUS DE JOUER (NOIR) ---")
-    
-    move_input = input("Entrez votre coup (r1,c1,r2,c2): ")
-    try:
-        r1, c1, r2, c2 = map(int, move_input.split(','))
-        result_black = game_instance.moves(r1, c1, r2, c2)
-        print(f"Résultat du coup Noir: {result_black}")
-    except ValueError:
-        print("Entrée invalide. Le jeu doit être redémarré.")
-    except IndexError:
-         print("Coordonnées hors limites (0-9).")
+try:
+    # 1. Tente de charger la clé depuis la variable d'environnement
+    key = os.environ.get("GROQ_API_KEY")
 
+    # 2. Si la variable d'environnement est vide, utilise la clé par défaut (codée en dur)
+    if not key:
+        key = DEFAULT_GROQ_API_KEY
+
+    # 3. Initialisation unique du client
+    client = Groq(api_key=key)
+    print("Client Groq initialisé avec succès.")
+
+except Exception as e:
+    print(f"Erreur lors de l'initialisation du client Groq : {e}")
+    client = None
+
+SYSTEM_PROMPT_FR = (
+    "Vous êtes un joueur de dames internationales (10x10) de classe mondiale. "
+    "Votre tâche est d'analyser l'état actuel du plateau et de suggérer le meilleur coup à jouer. "
+    "Le plateau est une grille 10x10, les coordonnées sont (ligne, colonne) de 0 à 9. "
+    "Le joueur actuel est UNIQUEMENT BLANC (W). Les pièces BLANCHES se trouvent aux LIGNES 6, 7, 8 et 9. "
+    "Elles doivent se déplacer vers le HAUT (lignes inférieures vers lignes supérieures) et en DIAGONALE. "
+    "ATTENTION : Les DAMES se jouent uniquement en DIAGONALE ! Pour un coup de pion 1x1, cela signifie que le déplacement (r1, c1) -> (r2, c2) DOIT AVOIR |r1-r2| = 1 et |c1-c2| = 1. "
+    "ÉTANT DONNÉ QUE C'EST LE PREMIER COUP DE L'OUVERTURE ET QU'IL N'Y A PAS DE CAPTURES POSSIBLES, "
+    "VOUS DEVEZ JOUER UN DÉPLACEMENT SIMPLE DIAGONAL DE 1x1, en bougeant un pion de la LIGNE 6 vers la LIGNE 5. "
+    "Vous DEVEZ répondre UNIQUEMENT avec un objet JSON qui suit EXACTEMENT cette structure : "
+    "{'r1': ligne_départ, 'c1': col_départ, 'r2': ligne_arrivée, 'c2': col_arrivée}. "
+    # Exemple d'un coup valide sur la ligne 6 vers la ligne 5 (qui doit être vide)
+    "Exemple de coup d'ouverture valide pour les BLANCS : {'r1': 6, 'c1': 0, 'r2': 5, 'c2': 1}. "
+    "N'ajoutez AUCUN texte ou explication, SEULEMENT l'objet JSON."
+)
+
+# ----------------------------------------------------------------------
+
+# --- TEST ET UTILISATION PRINCIPALE ---
+
+# ----------------------------------------------------------------------
 
 if __name__ == "__main__":
-    
+
     my_game = Game()
-    ai_bot = DraughtsAI() # Crée et initialise la connexion Groq
-    
-    if ai_bot.client is None:
-        print("Impossible de lancer le jeu sans connexion IA.")
-        exit()
 
     print("--- Plateau Initial ---")
     print(my_game.board)
     print("-" * 25)
 
-    # 1. Tour de l'IA (Blancs)
-    if my_game.current_player == "White":
-        execute_ai_turn(my_game, ai_bot)
+    # L'IA (Groq) joue le premier coup (Blancs)
+    if my_game.current_player == "White" :
+        result_white = my_game.llm_move(client, SYSTEM_PROMPT_FR)
+        print(f"\nCouleur jouée: Blanc\nRésultat: {result_white}")
 
     print("\n--- Plateau Après le Coup de l'IA (Blanc) ---")
     print(my_game.board)
     print("-" * 25)
-    
-    # 2. Tour de l'Humain (Noirs)
-    if my_game.current_player == "Black":
-        execute_human_turn(my_game)
 
-    print("\n--- Plateau Après le Coup de l'Humain (Noir) ---")
+    """
+ # L'IA (Groq) joue le tour des Noirs
+    if my_game.current_player == "Black" :
+        # --- BLOC JOUEUR HUMAIN (NOIR) ---
+        print("\n--- C'EST À VOUS DE JOUER (NOIR) ---")
+
+        # Vous pouvez demander les coordonnées en ligne de commande :
+        move_input = input("Entrez votre coup (r1,c1,r2,c2): ")
+
+        try:
+            r1, c1, r2, c2 = map(int, move_input.split(','))
+            result_black = my_game.moves(r1, c1, r2, c2)
+            print(f"Résultat du coup Noir: {result_black}")
+
+        except:
+            print("Entrée invalide. Le jeu doit être redémarré.")
+            result_black = "Échec du coup humain"
+        """
+
+    print("\n--- Plateau Après le Coup de l'IA (Noir) ---")
     print(my_game.board)
     print(f"Prochain joueur : {'Blanc' if my_game.current_player == "White" else "Noir"}")
-
