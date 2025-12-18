@@ -32,7 +32,7 @@ class Board():
             ["vw","pw","vw","pw","vw","pw","vw","pw","vw","pw"],\
             ["pw","vw","pw","vw","pw","vw","pw","vw","pw","vw"],\
             ["vw","pw","vw","pw","vw","pw","vw","pw","vw","pw"]]#Matrice pour vrai jeu
-        """self.matrice=["vb","vw","vb","vw","vb","vw","vb","vw","vb","vw"],\
+        self.matrice=[["vb","vw","vb","vw","vb","vw","vb","vw","vb","vw"],\
             ["vw","vb","vw","vb","vw","vb","vw","vb","vw","vb"],\
             ["vb","vw","vb","vw","vb","vw","vb","vw","vb","vw"],\
             ["vw","vb","vw","vb","vw","vb","vw","vb","vw","vb"],\
@@ -41,7 +41,7 @@ class Board():
             ["vb","vw","vb","vw","pw","vw","vb","vw","vb","vw"],\
             ["vw","vb","vw","pb","vw","vb","vw","vb","vw","vb"],\
             ["vb","vw","pw","vw","vb","vw","vb","vw","vb","vw"],\
-            ["vw","vb","vw","vb","vw","vb","vw","vb","vw","vb"]"""#matrice pour promotion et win
+            ["vw","vb","vw","vb","vw","vb","vw","vb","vw","vb"]]#matrice pour promotion et win
     def get_piece(self, r, c):
         return piece_dic[self.matrice[r][c]]
  
@@ -54,7 +54,7 @@ class Game():
     def __init__(self):
         self.board = Board()
         self.current_player = "White"
-        self.gagnant = None
+        self.winner = None
         self.state = "Started"
  
     def is_started(self):
@@ -66,14 +66,14 @@ class Game():
         else:
             self.current_player = "White"
     
-    def blackwin(m):
+    def blackwin(self,m):
         for i in m:
             for j in i:
                 if j == "pw" or j == "dw":
                     return False
         return True
     
-    def whitewin(m):
+    def whitewin(self,m):
         for i in m:
             for j in i:
                 if j == "pb" or j == "db":
@@ -192,7 +192,7 @@ class Game():
         if piece_dic[board[r2][c2]] not in ("Vide_brown","Vide_White"):
             return "La case d'arrivée n'est pas vide"
         if self.winner!=None:
-            return "La partie est fini, aucun mouvement peut être réalisé"
+            return "La partie est finie, aucun mouvement peut être réalisé"
  
         dr = r2 - r1
         dc = c2 - c1
@@ -246,13 +246,12 @@ class Game():
             board[next_r][next_c] = inv_piece_dic.get(piece)
             cur_r, cur_c = next_r, next_c
             self.promote_if_needed(cur_r, cur_c)
-        if self.blackwin(self.matrice):
+        if self.blackwin(board):
             self.winner="Black"
-            print("les noirs gagnent")
-        if self.whitewin(self.matrice):
+            return "La partie est finie, aucun mouvement peut être réalisé"
+        if self.whitewin(board):
             self.winner="White"
-            print("les blancs gagnent")
- 
+            return "La partie est finie, aucun mouvement peut être réalisé" 
         self.switch_turn()
         return board
     
