@@ -6,7 +6,7 @@ from game import Game,Board
 from savegame import Partie_database
 
 #Token bot discord
-TOKEN = "MTQzODE5ODc0MTQ5NTU3ODY4NA.GDN8aq.A3Tl8m1bcVld2efrEctG6SGIjyvTXenwJAxGac"
+TOKEN = "insert your token" 
 # Définir les intentions
 intents = discord.Intents.default()
 intents.message_content = True
@@ -24,6 +24,7 @@ emojis={"pw":"<:pion_blanc:1440245376673251348>","pb":"<:pion_noire:144024541855
 Bordure_lettre=["vb","emojiA","emojiB","emojiC","emojiD","emojiE","emojiF","emojiG","emojiH","emojiI","emojiJ","vb"]
 Bordure_chiffre=["emoji1","emoji2","emoji3","emoji4","emoji5","emoji6","emoji7","emoji8","emoji9","emoji10"]
 lettretochiffre={"A":1,"B":2,"C":3,"D":4,"E":5,"F":6,"G":7,"H":8,"I":9,"J":10}
+inv_lettre_to_chiffre={v:k for k,v in lettretochiffre.items()}
 
 def parse_move(txt):
     start,end=txt.split(":")
@@ -35,7 +36,7 @@ class GameSession:
         self.mode=mode
         self.players=players
         self.difficulty=difficulty
-        self.database=Partie_database()
+        self.database=Partie_database(player1=players["White"],player2=players["Black"])
 
 class ChoixAdversaire(discord.ui.View):
     def __init__(self):
@@ -43,17 +44,15 @@ class ChoixAdversaire(discord.ui.View):
     async def start_game(self,interaction,mode,difficulty=None,player2=None):
         nouvelle_partie=Game()
 
-        players={"White":interaction.user.id}
+        players={"White":interaction.user.name}
         if mode=="JCJ":
-            players["Black"]=player2.id
-            adversaire_name=player2.name
+            players["Black"]=player2.name
         else:
-            players["Black"]=["IA"]
-            adversaire_name=f"IA {difficulty}"
+            players["Black"]=f"IA {difficulty}"
         active_games[interaction.channel_id]=GameSession(nouvelle_partie,mode,players,difficulty)
         embed = discord.Embed(title="Partie Lancée !", color=discord.Color.green())
-        embed.add_field(name="White", value=interaction.user.name, inline=True)
-        embed.add_field(name="Black", value=adversaire_name, inline=True)
+        embed.add_field(name="White", value=players["White"], inline=True)
+        embed.add_field(name="Black", value=players["Black"], inline=True)
         await interaction.channel.send(embed=embed)
         await display_board(interaction.channel, nouvelle_partie)
 
@@ -120,7 +119,7 @@ async def dames(ctx):
     embed = discord.Embed(title="Jeu de Dames", description="Choisissez votre adversaire :")
     await ctx.send(embed=embed, view=ChoixAdversaire())
 
-async def play_ai_turn(channel, session):
+async def play_ai_facile(ctx,channel, session):
     """Gère le tour de l'IA"""
     game = session.game
     difficulty = session.difficulty
@@ -131,14 +130,16 @@ async def play_ai_turn(channel, session):
     move_tuple = random.choice(possibility)
     r1, c1, r2, c2, _ = move_tuple
     try:
-        game.moves(r1, c1, r2, c2)
+        result=game.moves(r1, c1, r2, c2)
+        session.database.coups(f"{inv_lettre_to_chiffre[c1+1]}{r1+1}:{inv_lettre_to_chiffre[c2+1]}{r2+1}")
         
         # 5. On affiche le message et le plateau
-        await channel.send(f"L'IA a joué : {r1},{c1} vers {r2},{c2}")
+        await channel.send(f"L'IA a joué : {inv_lettre_to_chiffre[c1+1]}{r1+1} vers {inv_lettre_to_chiffre[c2+1]}{r2+1}")
         
         # (Assure-toi d'avoir importé display_board ou qu'elle soit accessible)
         await display_board(channel, game)
-
+        if result == "La partie est finie, aucun mouvement peut être réalisé":
+                    await finish(ctx)
     except Exception as e:
         print(f"Erreur IA : {e}")
         await channel.send("l'IA a essayé un coup interdit.")
@@ -152,11 +153,11 @@ async def move(ctx,*,txt:str):
     game=session.game
     #verif le tour de l'utilisateur
     current_color=game.current_player
-    expected_player_id=session.players.get(current_color)
+    expected_player_name=session.players.get(current_color)
     # verif si tour IA
-    if expected_player_id=="IA":
+    if expected_player_name==f"IA {session.difficulty}":
         return await ctx.send(f"Attendez, c'est au tour de l'IA ({current_color}) !")
-    if  expected_player_id!=ctx.author.id:
+    if  expected_player_name!=ctx.author.name:
         return await ctx.send(f"Ce n'est pas votre tour ! C'est aux {current_color}s de jouer.")
     coords=parse_move(txt)
     if not coords:
@@ -164,11 +165,18 @@ async def move(ctx,*,txt:str):
     r1,c1,r2,c2=coords
 
     try:
-        game.moves(c1,r1,c2,r2)
-        session.database.coups(txt)
+        result=game.moves(c1,r1,c2,r2)
         await display_board(ctx.channel,game)
-        if session.mode=="IA":
-            await play_ai_turn(ctx.channel, session)
+        if type(result)==str:
+            if result == "La partie est finie, aucun mouvement peut être réalisé":
+                session.database.coups(txt)
+                await finish(ctx)
+            else:
+                await ctx.send(f"Coup impossible : {result}\nEssaye un autre coup.")
+        else:
+            session.database.coups(txt)
+            if session.mode=="IA":
+                await play_ai_facile(ctx,ctx.channel, session)
     except Exception as e:
         await ctx.send(f"Coup impossible : {e}")
 
@@ -176,10 +184,11 @@ async def move(ctx,*,txt:str):
 async def finish(ctx):
     session=active_games.get(ctx.channel.id)
     if session:
+        session.database.winner=f"{session.game.winner}/{session.players[session.game.winner]}"
         session.database.dict()
         session.database.add_data()
         del active_games[ctx.channel.id] # On supprime la partie
-        await ctx.send("Partie sauvegardée et terminée.")
+        await ctx.send(f"Partie sauvegardée et terminée.\n {session.players[session.game.winner]} a gagné")
     else: await ctx.send("Pas de partie à finir")
 
 bot.run(TOKEN)
