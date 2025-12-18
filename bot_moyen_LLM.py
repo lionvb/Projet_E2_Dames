@@ -45,12 +45,6 @@ SYSTEM_PROMPT_FR = (
     "N'ajoutez AUCUN texte ou explication, SEULEMENT l'objet JSON."
 )
 
-# ----------------------------------------------------------------------
-
-# --- TEST ET UTILISATION PRINCIPALE ---
-
-# ----------------------------------------------------------------------
-
 if __name__ == "__main__":
 
     my_game = Game()
