@@ -5,8 +5,9 @@ from discord.ext import commands
 from game import Game,Board
 from savegame import Partie_database
 
+
 #Token bot discord
-TOKEN = "insert your token" 
+TOKEN = "insere ton token"
 # Définir les intentions
 intents = discord.Intents.default()
 intents.message_content = True
@@ -41,14 +42,14 @@ class GameSession:
 class ChoixAdversaire(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=60)
-    async def start_game(self,interaction,mode,difficulty=None,player2=None):
+    async def start_game(self,interaction,mode,difficulty=None,player2=None,player1=None):
         nouvelle_partie=Game()
-
-        players={"White":interaction.user.name}
+        players={"White":player1.name}
         if mode=="JCJ":
             players["Black"]=player2.name
         else:
             players["Black"]=f"IA {difficulty}"
+        print(players)
         active_games[interaction.channel_id]=GameSession(nouvelle_partie,mode,players,difficulty)
         embed = discord.Embed(title="Partie Lancée !", color=discord.Color.green())
         embed.add_field(name="White", value=players["White"], inline=True)
@@ -63,11 +64,13 @@ class ChoixAdversaire(discord.ui.View):
             return await interaction.response.send_message("Tu attends déjà un adversaire !", ephemeral=True)
         jcj_queue.append(interaction.user)
         if len(jcj_queue)>=2:
+            print(jcj_queue)
             p1=jcj_queue.pop(0)
-            p2=p1=jcj_queue.pop(0)
+            p2=jcj_queue.pop(0)
+            print(p1,p2)
             for item in self.children: item.disable=True
             await interaction.response.edit_message(view=self)
-            await self.start_game(interaction,"JCJ",player2=p1)
+            await self.start_game(interaction,"JCJ",player1=p1,player2=p2)
         else:
             await interaction.response.send_message(f"{interaction.user.name} attend un adversaire ...",ephemeral=False)
 
