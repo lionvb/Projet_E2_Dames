@@ -4,34 +4,27 @@ import json
 column={"A":0,"B":1,"C":2,"D":3,"E":4,"F":5,"G":6,"H":7,"I":8,"J":9}
 piece_dic={"pw":"White","dw":"White_lady","pb":"Black","db":"Black_lady","vw":"Vide_White","vb":"Vide_brown"}
 inv_piece_dic={'White': 'pw', 'White_lady': 'dw', 'Black': 'pb', 'Black_lady': 'db', 'Vide_White': 'vw', 'Vide_brown': 'vb'}
-white_positions = [(1,2),(3,2),(5,2),(7,2),(9,2),
-        (2,1),(4,1),(6,1),(8,1),(10,1),
+ 
+# cases blanches initiales 
+white_positions = [(0,1),(2,1),(4,1),(6,1),(8,1),
+        (1,0),(3,0),(5,0),(7,0),(9,0),
+        (0,3),(2,3),(4,3),(6,3),(8,3),
+        (1,2),(3,2),(5,2),(7,2),(9,2),
+        (0,5),(2,5),(4,5),(6,5),(8,5),
         (1,4),(3,4),(5,4),(7,4),(9,4),
-        (2,3),(4,3),(6,3),(8,3),(10,3),
+        (0,7),(2,7),(4,7),(6,7),(8,7),
         (1,6),(3,6),(5,6),(7,6),(9,6),
-        (2,5),(4,5),(6,5),(8,5),(10,5),
-        (1,8),(3,8),(5,8),(7,8),(9,8),
-        (2,7),(4,7),(6,7),(8,7),(10,7),
-        (1,10),(3,10),(5,10),(7,10),(9,10),
-        (2,9),(4,9),(6,9),(8,9),(10,9)
+        (0,9),(2,9),(4,9),(6,9),(8,9),
+        (1,8),(3,8),(5,8),(7,8),(9,8)
 ]
-brown_positions = [(1,1),(3,1),(5,1),(7,1),(9,1),
-        (2,2),(4,2),(6,2),(8,2),(10,2),
-        (1,3),(3,3),(5,3),(7,3),(9,3),
-        (2,4),(4,4),(6,4),(8,4),(10,4),
-        (1,5),(3,5),(5,5),(7,5),(9,5),
-        (2,6),(4,6),(6,6),(8,6),(10,6), 
-        (1,7),(3,7),(5,7),(7,7),(9,7),
-        (2,8),(4,8),(6,8),(8,8),(10,8),
-        (1,9),(3,9),(5,9),(7,9),(9,9),
-        (2,10),(4,10),(6,10),(8,10),(10,10)
-]
-
-
+# brown_positions calculées 
+brown_positions = [(r,c) for r in range(10) for c in range(10) if (r,c) not in white_positions]
+ 
+ 
 class Board():
     def __init__(self):
-
-        """self.matrice= [
+        # position de départ standard
+        self.matrice= [
             ["pb","vw","pb","vw","pb","vw","pb","vw","pb","vw"],\
             ["vw","pb","vw","pb","vw","pb","vw","pb","vw","pb"],\
             ["pb","vw","pb","vw","pb","vw","pb","vw","pb","vw"],\
@@ -41,19 +34,8 @@ class Board():
             ["pw","vw","pw","vw","pw","vw","pw","vw","pw","vw"],\
             ["vw","pw","vw","pw","vw","pw","vw","pw","vw","pw"],\
             ["pw","vw","pw","vw","pw","vw","pw","vw","pw","vw"],\
-            ["vw","pw","vw","pw","vw","pw","vw","pw","vw","pw"]]#Matrice pour vrai jeu"""
-        """self.matrice= [
-            ["pb","vw","pb","vw","pb","vw","pb","vw","pb","vw"],\
-            ["vw","pb","vw","pb","vw","pb","vw","pb","vw","pb"],\
-            ["pb","vw","pb","vw","pb","vw","pb","vw","pb","vw"],\
-            ["vw","pb","vw","pb","vw","pb","vw","pb","vw","pb"],\
-            ["vb","vw","pw","vw","vb","vw","vb","vw","vb","vw"],\
-            ["vw","vb","vw","vb","vw","vb","vw","vb","vw","vb"],\
-            ["vb","vw","pw","vw","pw","vw","pw","vw","pw","vw"],\
-            ["vw","pw","vw","vb","vw","pw","vw","pw","vw","pw"],\
-            ["pw","vw","pw","vw","pw","vw","pw","vw","pw","vw"],\
-            ["vw","pw","vw","pw","vw","pw","vw","pw","vw","pw"]]"""#matrice test double capture
-        """self.matrice=["vb","vw","vb","vw","vb","vw","vb","vw","vb","vw"],\
+            ["vw","pw","vw","pw","vw","pw","vw","pw","vw","pw"]]#Matrice pour vrai jeu
+        self.matrice=[["vb","vw","vb","vw","vb","vw","vb","vw","vb","vw"],\
             ["vw","vb","vw","vb","vw","vb","vw","vb","vw","vb"],\
             ["vb","vw","vb","vw","vb","vw","vb","vw","vb","vw"],\
             ["vw","vb","vw","vb","vw","vb","vw","vb","vw","vb"],\
@@ -62,11 +44,12 @@ class Board():
             ["vb","vw","vb","vw","pw","vw","vb","vw","vb","vw"],\
             ["vw","vb","vw","pb","vw","vb","vw","vb","vw","vb"],\
             ["vb","vw","pw","vw","vb","vw","vb","vw","vb","vw"],\
-            ["vw","vb","vw","vb","vw","vb","vw","vb","vw","vb"]"""#matrice pour promotion et win
+            ["vw","vb","vw","vb","vw","vb","vw","vb","vw","vb"]]#matrice pour promotion et win
     def get_piece(self, r, c):
         return piece_dic[self.matrice[r][c]]
-
+ 
     def set_piece(self, r, c, value):
+        # value attendu : "White", "Black", "White_lady", "Black_lady", "Vide_White" ou "Vide_brown"
         self.matrice[r][c] = inv_piece_dic[value]
 
     def __str__(self):
@@ -93,11 +76,13 @@ class Game():
     def __init__(self):
         self.board = Board()
         self.current_player = "White"
-        self.gagnant = None
+        self.winner = None
         self.state = "Started"
+ 
     def is_started(self):
-        return self.state=="Started"
-    def switch_turn(self):  #Fonction pour changer de joueur 
+        return self.state == "Started"
+ 
+    def switch_turn(self):
         if self.current_player == "White":
             self.current_player = "Black"
         else:
@@ -161,41 +146,127 @@ class Game():
         return moves
 
     def promote_if_needed(self, r, c):
+        """Promotion automatique"""
         piece = self.board.get_piece(r, c)
-
-        # Un pion blanc devient une Dame
         if piece == "White" and r == 0:
             self.board.set_piece(r, c, "White_lady")
-
-        # Un pion noir Devient une Dame
         if piece == "Black" and r == 9:
             self.board.set_piece(r, c, "Black_lady")
-
-
+ 
+    def get_possible_captures(self, r, c):
+        """
+        Retourne toutes les captures légales depuis (r,c).
+        Format : [(landing_r, landing_c, eaten_r, eaten_c), ...]
+        Règles :
+         - pour un pion : case ennemie à (r+dr,c+dc) et atterrissage à (r+2dr,c+2dc)
+         - pour une dame : on balaye chaque diagonale,
+           on cherche la première pièce rencontrée ; si c'est un ennemi
+           et la case immédiatement après est libre -> capture possible, landing = ennemi + (dr,dc)
+           (=> la dame s'arrête **sur la case immédiatement après** l'ennemi)
+        """
+        board = self.board.matrice
+        piece = piece_dic[board[r][c]]
+        moves = []
+ 
+        is_lady = piece in ("White_lady", "Black_lady")
+        is_white = piece in ("White", "White_lady")
+ 
+        directions = [(-1,-1), (-1,1), (1,-1), (1,1)]
+ 
+        for dr, dc in directions:
+            if not is_lady:
+                # pion : capture simple en 2 cases
+                enemy_r = r + dr
+                enemy_c = c + dc
+                landing_r = r + 2*dr
+                landing_c = c + 2*dc
+ 
+                if not (0 <= enemy_r < 10 and 0 <= enemy_c < 10 and 0 <= landing_r < 10 and 0 <= landing_c < 10):
+                    continue
+ 
+                enemy_piece = piece_dic[board[enemy_r][enemy_c]]
+                landing_piece = piece_dic[board[landing_r][landing_c]]
+ 
+                if is_white and enemy_piece not in ("Black", "Black_lady"):
+                    continue
+                if (not is_white) and enemy_piece not in ("White", "White_lady"):
+                    continue
+ 
+                if landing_piece in ("Vide_White", "Vide_brown"):
+                    moves.append((landing_r, landing_c, enemy_r, enemy_c))
+                continue
+ 
+            # Dame : balayer la diagonale, trouver la PREMIERE pièce rencontrée.
+            step_r = r + dr
+            step_c = c + dc
+            enemy_found = False
+            enemy_r = enemy_c = None
+ 
+            # on avance case par case jusqu'à sortir ou trouver un bloc
+            while 0 <= step_r < 10 and 0 <= step_c < 10:
+                p = piece_dic[board[step_r][step_c]]
+                if p in ("Vide_brown", "Vide_White"):
+                    # case vide : si on a déjà trouvé un ennemi, la première case vide
+                    # immédiatement après l'ennemi est candidate (on ajoute et stop)
+                    if enemy_found:
+                        # landing = cette case vide directement après l'ennemi
+                        moves.append((step_r, step_c, enemy_r, enemy_c))
+                        break
+                    # sinon on continue à avancer à la recherche d'une pièce
+                    step_r += dr
+                    step_c += dc
+                    continue
+ 
+                # si ici, case occupée
+                if not enemy_found:
+                    # si cette pièce est un ennemi -> marque-la et continue
+                    if (is_white and p in ("Black", "Black_lady")) or (not is_white and p in ("White", "White_lady")):
+                        enemy_found = True
+                        enemy_r, enemy_c = step_r, step_c
+                        # après avoir marqué l'ennemi, on doit regarder la case suivante
+                        step_r += dr
+                        step_c += dc
+                        continue
+                    else:
+                        # si c'est une pièce amie ou obstacle -> pas de capture possible sur cette diagonale
+                        break
+                else:
+                    # on a déjà trouvé un ennemi et sommes tombés sur une 2ème pièce (ami ou ennemi) -> stop
+                    break
+ 
+        return moves
+ 
     def moves(self, r1, c1, r2, c2):
-        
+        """
+        Effectue un déplacement ou une capture (avec captures multiples automatiques).
+        Renvoie :
+         - la matrice (board) en cas de succès (pratique pour le bot),
+         - une chaîne d'erreur si coup invalide.
+        """
         board = self.board.matrice
         piece = piece_dic[board[r1][c1]]
-      
-
-        if piece in ("Vide_brown","Vide_white"):
+ 
+        # validations de base
+        if piece in ("Vide_brown","Vide_White"):
             return "pas de pièce sur la case"
-        
-        if (piece in ("White", "White_lady") and self.current_player != "White") or (piece in ("Black", "Black_lady") and self.current_player != "Black"):
+ 
+        if (piece in ("White", "White_lady") and self.current_player != "White") or \
+           (piece in ("Black", "Black_lady") and self.current_player != "Black"):
             return "Ce n'est pas à toi de jouer"
-        
-        if piece_dic.get(board[r2][c2]) not in ("Vide_brown","Vide_white"):
+ 
+        if piece_dic[board[r2][c2]] not in ("Vide_brown","Vide_White"):
             return "La case d'arrivée n'est pas vide"
-
+        if self.winner!=None:
+            return "La partie est finie, aucun mouvement peut être réalisé"
+ 
         dr = r2 - r1
         dc = c2 - c1
-
-        #Déplacement standard"
-        if abs(dr) == 1 and abs(dc) == 1: 
-
+ 
+        # --- déplacement simple (1 diag)
+        if abs(dr) == 1 and abs(dc) == 1:
             if piece == "White" and dr != -1:
                 return "Les pions blancs vont vers le haut du plateau sauf si vous êtes une dame"
-            if piece == "Black" and dr != +1:
+            if piece == "Black" and dr != 1:
                 return "Les pions noirs vont vers le bas du plateau sauf si vous êtes une dame"
 
             # Déplacements
