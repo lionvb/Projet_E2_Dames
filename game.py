@@ -30,30 +30,7 @@ brown_positions = [(1,1),(3,1),(5,1),(7,1),(9,1),
 
 class Board():
     def __init__(self):
-        self.matrice = [
-            # L0 (Pb) : Pair = Pb
-            ["pb","vw","pb","vw","pb","vw","pb","vw","pb","vw"],
-            # L1 (Pb) : Impair = Pb
-            ["vw","pb","vw","pb","vw","pb","vw","pb","vw","pb"],
-            # L2 (Pb) : Pair = Pb
-            ["pb","vw","pb","vw","pb","vw","pb","vw","pb","vw"],
-            # L3 (Pb) : Impair = Pb
-            ["vw","pb","vw","pb","vw","pb","vw","pb","vw","pb"],
-            
-            # L4 (Vide)
-            ["vb","vw","vb","vw","vb","vw","vb","vw","vb","vw"],
-            # L5 (Vide)
-            ["vw","vb","vw","vb","vw","vb","vw","vb","vw","vb"],
-            
-            # L6 (Pw) : Pair = Pw
-            ["pw","vw","pw","vw","pw","vw","pw","vw","pw","vw"], # <--- [6][5] DOIT ÊTRE vw
-            # L7 (Pw) : Impair = Pw
-            ["vw","pw","vw","pw","vw","pw","vw","pw","vw","pw"],
-            # L8 (Pw) : Pair = Pw
-            ["pw","vw","pw","vw","pw","vw","pw","vw","pw","vw"],
-            # L9 (Pw) : Impair = Pw
-            ["vw","pw","vw","pw","vw","pw","vw","pw","vw","pw"]
-        ]
+
         """self.matrice= [
             ["pb","vw","pb","vw","pb","vw","pb","vw","pb","vw"],\
             ["vw","pb","vw","pb","vw","pb","vw","pb","vw","pb"],\
