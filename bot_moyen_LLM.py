@@ -5,18 +5,20 @@ from game import *
 
 class DraughtsBot:
     def __init__(self):
-        # Ta clé par défaut
-        self.default_key = "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"
+        # On récupère la clé depuis les variables d'environnement (plus sécurisé)
+        key = os.environ.get("GROQ_API_KEY")
         
-        # Initialisation du client Groq (ton code original mis en structure)
-        key = os.environ.get("GROQ_API_KEY") or self.default_key
-        try:
-            self.client = Groq(api_key=key)
-            print("Client Groq initialisé avec succès pour la classe DraughtsBot.")
-        except Exception as e:
-            print(f"Erreur d'initialisation Groq : {e}")
+        if not key:
+            print("erreur : La variable d'environnement GROQ_API_KEY est manquante !")
             self.client = None
-
+        else:
+            try:
+                self.client = Groq(api_key=key)
+                print("client Groq initialisé avec succès ")
+            except Exception as e:
+                print(f"erreur d'initialisation Groq : {e}")
+                self.client = None
+                
         # Ton prompt exact
         self.system_prompt = (
             "Vous êtes un joueur de dames internationales (10x10) de classe mondiale. "
@@ -34,7 +36,7 @@ class DraughtsBot:
         )
 
 
-def jouer_coup_ia(self, instance_jeu):
+    def jouer_coup_ia(self, instance_jeu):
         """
         instance_jeu doit être un objet de la classe Game().
         Cette fonction appelle llm_move que tu as déjà définie dans Game.
