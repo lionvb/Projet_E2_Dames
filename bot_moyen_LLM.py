@@ -5,7 +5,7 @@ from game import *
 
 class DraughtsBot:
     def __init__(self):
-        # On récupère la clé depuis les variables d'environnement (plus sécurisé)
+        
         key = os.environ.get("GROQ_API_KEY")
         
         if not key:
@@ -19,7 +19,7 @@ class DraughtsBot:
                 print(f"erreur d'initialisation Groq : {e}")
                 self.client = None
                 
-        # Ton prompt exact
+
         self.system_prompt = (
             "Vous êtes un joueur de dames internationales (10x10) de classe mondiale. "
             "Votre tâche est d'analyser l'état actuel du plateau et de suggérer le meilleur coup à jouer. "
@@ -44,7 +44,6 @@ class DraughtsBot:
         if self.client is None:
             return "Erreur : Client Groq non disponible."
         
-        # On appelle la fonction de TON fichier game.py
-        # result contiendra soit le nouveau plateau, soit un message d'erreur
+      
         resultat = instance_jeu.llm_move(self.client, self.system_prompt)
         return resultat
