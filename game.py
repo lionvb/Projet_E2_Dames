@@ -1,3 +1,6 @@
+import json
+
+
 column={"A":0,"B":1,"C":2,"D":3,"E":4,"F":5,"G":6,"H":7,"I":8,"J":9}
 piece_dic={"pw":"White","dw":"White_lady","pb":"Black","db":"Black_lady","vw":"Vide_White","vb":"Vide_brown"}
 inv_piece_dic={'White': 'pw', 'White_lady': 'dw', 'Black': 'pb', 'Black_lady': 'db', 'Vide_White': 'vw', 'Vide_brown': 'vb'}
@@ -48,8 +51,27 @@ class Board():
     def set_piece(self, r, c, value):
         # value attendu : "White", "Black", "White_lady", "Black_lady", "Vide_White" ou "Vide_brown"
         self.matrice[r][c] = inv_piece_dic[value]
- 
- 
+
+    def __str__(self):
+        # Mappage des codes internes aux symboles attendus par l'IA (W, Wl, B, Bl, .)
+        mapping = {
+            "pw": "W",
+            "dw": "Wl",
+            "pb": "B",
+            "db": "Bl",
+            "vw": ".", # Case vide blanche
+            "vb": ".", # Case vide marron
+        }
+        
+        board_str = ""
+        # self.matrice est une liste de tuples ou de listes représentant les lignes
+        for row in self.matrice:
+            # Joindre les symboles, séparés par un espace
+            board_str += " ".join(mapping.get(cell, '?') for cell in row)
+            board_str += "\n"
+            
+        return board_str.strip() # Renvoie la chaîne de caractères formatée
+
 class Game():
     def __init__(self):
         self.board = Board()
@@ -65,21 +87,64 @@ class Game():
             self.current_player = "Black"
         else:
             self.current_player = "White"
+
+
+    def get_empty_code(self, r, c):
+        # Utilise l'indexation 1-10 pour vérifier si la position est 'white_positions'
+        pos_1_10 = (r + 1, c + 1)
+        # Si la position n'est ni blanche, ni marron (cas d'erreur), on suppose 'vb'
+        if pos_1_10 in white_positions:
+            return "vw"
+        elif pos_1_10 in brown_positions:
+            return "vb"
+        # Pour les cases non jouables ou hors limite, nous retournons une couleur par défaut
+        return "vb"
     
-    def blackwin(self,m):
-        for i in m:
-            for j in i:
-                if j == "pw" or j == "dw":
-                    return False
-        return True
-    
-    def whitewin(self,m):
-        for i in m:
-            for j in i:
-                if j == "pb" or j == "db":
-                    return False
-        return True
-    
+
+    def get_possible_captures(self, r, c): 
+        print(r,c)
+        # Va retourner toutes les captures possibles sous la forme
+        # [(r_arrivée, c_arrivée, r_mangé, c_mangé), ...]
+        # ex Atterrir en (4, 6) en mangeant la pièce en (3, 5)
+        board = self.board.matrice
+        piece = piece_dic[board[r][c]] # On regarde quelle type de pièce est sur la case
+        moves = [] # Liste des captures
+        
+
+        if piece == "White_lady" or piece == "Black_lady":
+            directions = [(-1, -1), (-1, +1), (+1, -1), (+1, +1)]
+        elif piece == "White":
+            directions = [(-1, -1), (-1, +1)]
+        else: # La piece == Black
+            directions = [(+1, -1), (+1, +1)]
+
+        for dr, dc in directions:
+            # Position pièce ennemie -> case juste devant le pion
+            enemy_r = r + dr
+            enemy_c = c + dc
+            # Position d'arrivée avec capture -> case située 2 cases plus loin
+            jump_r = r + 2*dr
+            jump_c = c + 2*dc
+
+            if  not (0 <= enemy_r < 10 and 0 <= enemy_c < 10):
+                continue
+            if  not (0 <= jump_r < 10 and 0 <= jump_c < 10):
+                continue
+
+            enemy_piece = piece_dic[board[enemy_r][enemy_c]] # Position de la pièce ennemie
+
+            # On vérifie que c'est bien un ennemi
+            if piece in ("White", "White_lady") and enemy_piece not in ("Black", "Black_lady"):
+                continue
+            if piece in ("Black", "Black_lady") and enemy_piece not in ("White", "White_lady"):
+                continue
+
+            if board[jump_r][jump_c] not in ("Vide_brown","Vide_white"): # La case est libre
+                continue
+            
+            moves.append((jump_r, jump_c, enemy_r, enemy_c))
+        return moves
+
     def promote_if_needed(self, r, c):
         """Promotion automatique"""
         piece = self.board.get_piece(r, c)
@@ -203,120 +268,129 @@ class Game():
                 return "Les pions blancs vont vers le haut du plateau sauf si vous êtes une dame"
             if piece == "Black" and dr != 1:
                 return "Les pions noirs vont vers le bas du plateau sauf si vous êtes une dame"
- 
-            board[r1][c1] = "vw" if (r1,c1) in white_positions else "vb"
+
+            # Déplacements
+
+            board[r1][c1] = self.get_empty_code(r1, c1) 
             board[r2][c2] = inv_piece_dic.get(piece)
-            self.promote_if_needed(r2, c2)
-            self.switch_turn()
+            #board[r1][c1] = "vw" if (r1,c1) in white_positions else "vb" #Case de la où l'on vient devient vide
+            #board[r2][c2] = inv_piece_dic.get(piece) # Nouvelle case occupée par le pion
+
+            self.promote_if_needed(r2, c2)  # Si la case d'arrivée est une case du bout du plateau"
+
+            self.switch_turn() # passer à l'autre joueur
+
             return board
- 
-        # --- capture (pion ou dame)
-        possible_caps = self.get_possible_captures(r1, c1)
- 
-        # vérifier si (r2,c2) est une capture légale
-        chosen_cap = None
-        for cap in possible_caps:
-            if cap[0] == r2 and cap[1] == c2:
-                chosen_cap = cap
-                break
-        if chosen_cap is None:
-            return "Le déplacement n'est pas autorisé"
- 
-        # exécuter la capture choisie
-        jump_r, jump_c, eat_r, eat_c = chosen_cap
- 
-        # vider départ, supprimer mangé, poser pièce
-        board[r1][c1] = "vw" if (r1,c1) in white_positions else "vb"
-        board[eat_r][eat_c] = "vw" if (eat_r,eat_c) in white_positions else "vb"
-        board[jump_r][jump_c] = inv_piece_dic.get(piece)
- 
-        # promotion si besoin (pion qui arrive)
-        self.promote_if_needed(jump_r, jump_c)
- 
-        # capture multiple automatique : on vérifie à partir de la nouvelle position
-        cur_r, cur_c = jump_r, jump_c
-        while True:
-            next_caps = self.get_possible_captures(cur_r, cur_c)
-            if not next_caps:
-                break
-            # on prend la première capture trouvée (tu peux remplacer par choix du joueur si souhaité)
-            next_r, next_c, eat_r, eat_c = next_caps[0]
-            board[cur_r][cur_c] = "vw" if (cur_r,cur_c) in white_positions else "vb"
-            board[eat_r][eat_c] = "vw" if (eat_r,eat_c) in white_positions else "vb"
-            board[next_r][next_c] = inv_piece_dic.get(piece)
-            cur_r, cur_c = next_r, next_c
-            self.promote_if_needed(cur_r, cur_c)
-        if self.blackwin(board):
-            self.winner="Black"
-            return "La partie est finie, aucun mouvement peut être réalisé"
-        if self.whitewin(board):
-            self.winner="White"
-            return "La partie est finie, aucun mouvement peut être réalisé" 
-        self.switch_turn()
-        return board
+
+        # Déplacement avec capture d'un pion    
+        if abs(dr) >= 2 or abs(dc) >= 2:  
+
+            mid_r = (r1 + r2) // 2
+            mid_c = (c1 + c2) // 2
+            middle_piece = piece_dic[board[mid_r][mid_c]]
+
+            if piece in ("White", "White_lady") and middle_piece not in ("Black", "Black_lady"):
+                return "Pas de pièce à capturer"
+            if piece in ("Black", "Black_lady") and middle_piece not in ("White", "White_lady"):
+                return "Pas de pièce à capturer"
+
+            board[r1][c1] = self.get_empty_code(r1, c1)
+            board[mid_r][mid_c] = self.get_empty_code(mid_r, mid_c)
+            #board[r1][c1] = "vw" if (r1,c1) in white_positions else "vb" #Case de la où on vient devient vide
+            #board[mid_r][mid_c] = "vw" if (r1,c1) in white_positions else "vb" #SI l'on a manger un pion la case devient vide car le pion est retiré
+            board[r2][c2] = inv_piece_dic.get(piece) # Nouvelle case occupé par le pion
+
+            self.promote_if_needed(r2, c2)  # Si pendant que l'on mange on arrive au bout du board
+
+            current_r, current_c = r2, c2
+            #DOUBLE CAPTURE NE FONCTIONNE PAS IL FAUT RECTIFIER çA
+            # Tant qu'une capture est possible on continue 
+            while True:
+                print(current_r,current_c)
+                next_caps = self.get_possible_captures(current_r, current_c)
+                
+                if not next_caps: # Plus de capture possible
+                    break
+
+                #On peut choisir la première capture
+                next_r, next_c, eat_r, eat_c = next_caps[0]
+
+                #Exécution de la capture suivante
+                board[current_r][current_c] = self.get_empty_code(current_r, current_c)
+                board[eat_r][eat_c] = self.get_empty_code(eat_r, eat_c)
+                #board[current_r][current_c] = "vw" if (r1,c1) in white_positions else "vb"
+                #board[eat_r][eat_c] = "vw" if (r1,c1) in white_positions else "vb"
+                board[next_r][next_c] = inv_piece_dic.get(piece)
+
+                current_r, current_c = next_r, next_c
+                if not self.get_possible_captures(current_r, current_c):
+                    break
+                self.promote_if_needed(current_r, current_c)
+
+
+            self.switch_turn() # passer à l'autre joueur
+
+            return board
+        else:
+            return None
+        
+
+
+    def llm_move(self, groq_client, system_prompt):
+        """Demande à l'IA (via Groq) un coup et l'exécute."""
+
+        # 1. Vérification du client (pas besoin de global)
+        if groq_client is None:
+            print("Client Groq non initialisé. Impossible de demander le coup.")
+            return "Échec de l'obtention du coup (Client Groq absent)"
+
+        player_color = "Blanc (W/Wk)" if self.current_player == "White" else "Noir (B/Bk)"
+        
+        # Construction du USER PROMPT (état du jeu)
+        user_prompt = (
+            f"Le joueur actuel est : {player_color}. "
+            "Voici la grille actuelle du plateau :\n"
+            f"{str(self.board)}"
+        )
+        
+        print(f"-> Consultation de l'IA Groq pour le joueur {player_color}...")
+        
+        try:
+            # Appel à l'API Groq (utilisation de groq_client et system_prompt)
+            response = groq_client.chat.completions.create(
+                model="llama-3.1-8b-instant", 
+                messages=[
+                    {"role": "system", "content": system_prompt}, 
+                    {"role": "user", "content": user_prompt}
+                ],
+                response_format={"type": "json_object"} 
+            )
+            
+            # ... (Le reste du code de parsing et d'exécution reste le même) ...
+            response_text = response.choices[0].message.content
+            move_data = json.loads(response_text)
+            
+            r1 = move_data.get('r1')
+            c1 = move_data.get('c1')
+            r2 = move_data.get('r2')
+            c2 = move_data.get('c2')
+            
+            if not all(isinstance(coord, int) for coord in [r1, c1, r2, c2]):
+                raise ValueError(f"Le format JSON de l'IA est incorrect ou incomplet: {response_text}")
     
-    def get_all_valid_moves(self, player_color):
-        """
-        Génère tous les coups possibles pour un joueur donné ("White" ou "Black").
-        Retourne une liste de tuples : (r_start, c_start, r_end, c_end, is_capture)
-        """
-        moves = []
-        captures = []
-        board = self.board.matrice
+            print(f"L'IA Groq suggère le coup : ({r1}, {c1}) -> ({r2}, {c2})")
+
+            try:
+                piece_at_dest = self.board.matrice[r2][c2]
+                print(f"DEBUG: Contenu réel de la case d'arrivée ({r2}, {c2}): {piece_at_dest}")
+            except (IndexError, TypeError):
+                print("DEBUG: Coordonnées d'arrivée hors limites ou invalides.")
+            
+            result = self.moves(r1, c1, r2, c2)
+            
+            print(f"Résultat de l'exécution: {result}")
+            return result
         
-        # On détermine les directions de mouvement simples selon la couleur
-        # Blanc monte (r diminue), Noir descend (r augmente)
-        pion_direction = -1 if player_color == "White" else 1
-        
-        # Mapping pour identifier les pièces du joueur
-        my_pieces = ["White", "White_lady"] if player_color == "White" else ["Black", "Black_lady"]
-        
-        for r in range(10):
-            for c in range(10):
-                p = piece_dic[board[r][c]]
-                
-                # Si ce n'est pas ma pièce, on passe
-                if p not in my_pieces:
-                    continue
-                
-                is_lady = "_lady" in p
-                
-                # 1. Regarder les CAPTURES (Prises)
-                possible_caps = self.get_possible_captures(r, c)
-                for cap in possible_caps:
-                    # format cap: (landing_r, landing_c, eaten_r, eaten_c)
-                    captures.append((r, c, cap[0], cap[1], True))
-                
-                # 2. Regarder les DÉPLACEMENTS SIMPLES
-                # (Seulement si on n'est pas obligé de manger, mais on liste tout pour l'instant)
-                directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
-                
-                for dr, dc in directions:
-                    # Pour un pion, on vérifie qu'il va dans le bon sens (sauf dame)
-                    if not is_lady:
-                        if dr != pion_direction:
-                            continue
-                            
-                    # Logique déplacement PION
-                    if not is_lady:
-                        nr, nc = r + dr, c + dc
-                        if 0 <= nr < 10 and 0 <= nc < 10:
-                            if piece_dic[board[nr][nc]] in ("Vide_brown", "Vide_White"):
-                                moves.append((r, c, nr, nc, False))
-                                
-                    # Logique déplacement DAME
-                    else:
-                        step_r, step_c = r + dr, c + dc
-                        while 0 <= step_r < 10 and 0 <= step_c < 10:
-                            if piece_dic[board[step_r][step_c]] in ("Vide_brown", "Vide_White"):
-                                moves.append((r, c, step_r, step_c, False))
-                                step_r += dr
-                                step_c += dc
-                            else:
-                                break # On est bloqué par une pièce
-                                
-        # RÈGLE DU JEU DE DAMES : La prise est souvent obligatoire.
-        # Si des captures existent, on ne retourne que les captures.
-        if captures:
-            return captures
-        return moves
+        except Exception as e:
+            print(f"Erreur lors de l'appel ou du traitement de l'IA Groq : {e}")
+            return "Échec de l'obtention du coup de l'IA Groq"
