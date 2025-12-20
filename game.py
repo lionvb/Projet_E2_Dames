@@ -87,7 +87,20 @@ class Game():
             self.current_player = "Black"
         else:
             self.current_player = "White"
-
+    def blackwin(self,m):
+        for i in m:
+            for j in i:
+                if j=="pw"or j=="dw":
+                    return False
+        return True
+    
+    def whitewin(self,m):
+        for i in m:
+            for j in i:
+                if j=="pb"or j=="db":
+                    return False
+        return True
+                    
 
     def get_empty_code(self, r, c):
         # Utilise l'indexation 1-10 pour vérifier si la position est 'white_positions'
@@ -326,14 +339,81 @@ class Game():
                 if not self.get_possible_captures(current_r, current_c):
                     break
                 self.promote_if_needed(current_r, current_c)
-
-
+            if self.blackwin(board):
+                self.winner="Black"
+                return "La partie est finie, aucun mouvement peut être réalisé"
+            if self.whitewin(board):
+                self.winner="White"
+                return "La partie est finie, aucun mouvement peut être réalisé" 
             self.switch_turn() # passer à l'autre joueur
 
             return board
         else:
+
             return None
+    def get_all_valid_moves(self, player_color):
+        """Génère tous les coups possibles pour un joueur donné ("White" ou "Black").
+        Retourne une liste de tuples : (r_start, c_start, r_end, c_end, is_capture)"""
+        moves = []
+        captures = []
+        board = self.board.matrice
         
+        # On détermine les directions de mouvement simples selon la couleur
+        # Blanc monte (r diminue), Noir descend (r augmente)
+        pion_direction = -1 if player_color == "White" else 1
+        
+        # Mapping pour identifier les pièces du joueur
+        my_pieces = ["White", "White_lady"] if player_color == "White" else ["Black", "Black_lady"]
+        
+        for r in range(10):
+            for c in range(10):
+                p = piece_dic[board[r][c]]
+                
+                # Si ce n'est pas ma pièce, on passe
+                if p not in my_pieces:
+                    continue
+                
+                is_lady = "_lady" in p
+                
+                # 1. Regarder les CAPTURES (Prises)
+                possible_caps = self.get_possible_captures(r, c)
+                for cap in possible_caps:
+                    # format cap: (landing_r, landing_c, eaten_r, eaten_c)
+                    captures.append((r, c, cap[0], cap[1], True))
+                
+                # 2. Regarder les DÉPLACEMENTS SIMPLES
+                # (Seulement si on n'est pas obligé de manger, mais on liste tout pour l'instant)
+                directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
+                
+                for dr, dc in directions:
+                    # Pour un pion, on vérifie qu'il va dans le bon sens (sauf dame)
+                    if not is_lady:
+                        if dr != pion_direction:
+                            continue
+                            
+                    # Logique déplacement PION
+                    if not is_lady:
+                        nr, nc = r + dr, c + dc
+                        if 0 <= nr < 10 and 0 <= nc < 10:
+                            if piece_dic[board[nr][nc]] in ("Vide_brown", "Vide_White"):
+                                moves.append((r, c, nr, nc, False))
+                                
+                    # Logique déplacement DAME
+                    else:
+                        step_r, step_c = r + dr, c + dc
+                        while 0 <= step_r < 10 and 0 <= step_c < 10:
+                            if piece_dic[board[step_r][step_c]] in ("Vide_brown", "Vide_White"):
+                                moves.append((r, c, step_r, step_c, False))
+                                step_r += dr
+                                step_c += dc
+                            else:
+                                break # On est bloqué par une pièce
+                                
+        # RÈGLE DU JEU DE DAMES : La prise est souvent obligatoire.
+        # Si des captures existent, on ne retourne que les captures.
+        if captures:
+            return captures
+        return moves
 
 
     def llm_move(self, groq_client, system_prompt):
@@ -369,7 +449,7 @@ class Game():
             # ... (Le reste du code de parsing et d'exécution reste le même) ...
             response_text = response.choices[0].message.content
             move_data = json.loads(response_text)
-            
+            print(move_data)
             r1 = move_data.get('r1')
             c1 = move_data.get('c1')
             r2 = move_data.get('r2')
