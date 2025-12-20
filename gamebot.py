@@ -4,10 +4,10 @@ from discord import Embed
 from discord.ext import commands
 from game import Game,Board
 from savegame import Partie_database
-
+from bot_moyen_LLM import DraughtsBot
 
 #Token bot discord
-TOKEN = "insere ton token"
+TOKEN="MTQzODE5ODc0MTQ5NTU3ODY4NA.Gaa3Ix.wWwMdUjOnm9Ft-sJNmYE0sol0CcewgTks3FeII"
 # Définir les intentions
 intents = discord.Intents.default()
 intents.message_content = True
@@ -32,17 +32,17 @@ def parse_move(txt):
     return int(lettretochiffre[start[0].upper()])-1,int(start[1:])-1,int(lettretochiffre[end[0].upper()])-1,int(end[1:])-1
 
 class GameSession:
-    def __init__(self,game_instance,mode,players,difficulty=None):
+    def __init__(self,game_instance,mode,players,difficulty=None,ia=None):
         self.game=game_instance
         self.mode=mode
         self.players=players
         self.difficulty=difficulty
         self.database=Partie_database(player1=players["White"],player2=players["Black"])
-
+        self.ia=ia
 class ChoixAdversaire(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=60)
-    async def start_game(self,interaction,mode,difficulty=None,player2=None,player1=None):
+    async def start_game(self,interaction,mode,difficulty=None,player2=None,player1=None,ia=None):
         nouvelle_partie=Game()
         players={"White":player1.name}
         if mode=="JCJ":
@@ -50,7 +50,7 @@ class ChoixAdversaire(discord.ui.View):
         else:
             players["Black"]=f"IA {difficulty}"
         print(players)
-        active_games[interaction.channel_id]=GameSession(nouvelle_partie,mode,players,difficulty)
+        active_games[interaction.channel_id]=GameSession(nouvelle_partie,mode,players,difficulty,ia=ia)
         embed = discord.Embed(title="Partie Lancée !", color=discord.Color.green())
         embed.add_field(name="White", value=players["White"], inline=True)
         embed.add_field(name="Black", value=players["Black"], inline=True)
@@ -79,14 +79,15 @@ class ChoixAdversaire(discord.ui.View):
         for item in self.children:
                 item.disabled = True
         await interaction.response.edit_message(view=self)
-        await self.start_game(interaction, "IA", difficulty="facile")
+        await self.start_game(interaction, "IA", difficulty="facile",player1=interaction.user)
         
     @discord.ui.button(label="IA LLM moyen", style=discord.ButtonStyle.primary)
     async def ia_llm(self, interaction: discord.Interaction, button: discord.ui.Button):
+        ia_moyen=DraughtsBot()
         for item in self.children:
                 item.disabled = True
         await interaction.response.edit_message(view=self)
-        await self.start_game(interaction, "IA", difficulty="moyen")
+        await self.start_game(interaction, "IA", difficulty="moyen",player1=interaction.user,ia=ia_moyen)
 
     @discord.ui.button(label="IA difficile", style=discord.ButtonStyle.primary)
     async def ia_difficile(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -123,7 +124,7 @@ async def dames(ctx):
     await ctx.send(embed=embed, view=ChoixAdversaire())
 
 async def play_ai_facile(ctx,channel, session):
-    """Gère le tour de l'IA"""
+    """Gère le tour de l'IA facile"""
     game = session.game
     difficulty = session.difficulty
     possibility = game.get_all_valid_moves("Black")
@@ -142,10 +143,36 @@ async def play_ai_facile(ctx,channel, session):
         # (Assure-toi d'avoir importé display_board ou qu'elle soit accessible)
         await display_board(channel, game)
         if result == "La partie est finie, aucun mouvement peut être réalisé":
-                    await finish(ctx)
+            await finish(ctx)
     except Exception as e:
         print(f"Erreur IA : {e}")
         await channel.send("l'IA a essayé un coup interdit.")
+
+async def play_ai_moyen(ctx,channel, session):
+    """Gère le tour de l'IA moyen """
+    game = session.game
+    difficulty = session.difficulty
+    """possibility = game.get_all_valid_moves("Black") # pas besoin
+    if not possibility:
+        await channel.send("L'IA est bloquée !")
+        return
+    move_tuple = random.choice(possibility)#a modif avec ll move
+    r1, c1, r2, c2, _ = move_tuple"""#a modif
+    game.llm_move(session.ia.client,session.ia.system_prompt)
+    """try:
+        result=game.moves(r1, c1, r2, c2)
+        session.database.coups(f"{inv_lettre_to_chiffre[c1+1]}{r1+1}:{inv_lettre_to_chiffre[c2+1]}{r2+1}")
+        
+        # 5. On affiche le message et le plateau
+        await channel.send(f"L'IA a joué : {inv_lettre_to_chiffre[c1+1]}{r1+1} vers {inv_lettre_to_chiffre[c2+1]}{r2+1}")
+        
+        # (Assure-toi d'avoir importé display_board ou qu'elle soit accessible)
+        await display_board(channel, game)
+        if result == "La partie est finie, aucun mouvement peut être réalisé":
+            await finish(ctx)
+    except Exception as e:
+        print(f"Erreur IA : {e}")
+        await channel.send("l'IA a essayé un coup interdit.")"""
 
 @bot.command()
 async def move(ctx,*,txt:str):
@@ -178,8 +205,10 @@ async def move(ctx,*,txt:str):
                 await ctx.send(f"Coup impossible : {result}\nEssaye un autre coup.")
         else:
             session.database.coups(txt)
-            if session.mode=="IA":
+            if session.difficulty=="facile":
                 await play_ai_facile(ctx,ctx.channel, session)
+            if session.difficulty=="moyen":
+                await play_ai_moyen(ctx,ctx.channel,session)
     except Exception as e:
         await ctx.send(f"Coup impossible : {e}")
 
