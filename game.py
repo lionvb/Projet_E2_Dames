@@ -271,10 +271,63 @@ class Game():
             return "La case d'arrivée n'est pas vide"
         if self.winner!=None:
             return "La partie est finie, aucun mouvement peut être réalisé"
+
+        is_lady = piece in ("White_lady", "Black_lady")
+        is_white = piece in ("White", "White_lady")
  
+ 
+        if is_lady:
+            print("lady")
+            dr = r2 - r1
+            dc = c2 - c1
+ 
+            # déplacement strictement diagonal
+            if abs(dr) != abs(dc):
+                return "Une dame se déplace uniquement en diagonale"
+ 
+            step_r = 1 if dr > 0 else -1
+            step_c = 1 if dc > 0 else -1
+ 
+            cur_r = r1 + step_r
+            cur_c = c1 + step_c
+ 
+            captured = []
+ 
+            while cur_r != r2 and cur_c != c2:
+                p = piece_dic[board[cur_r][cur_c]]
+ 
+                # pion allié → mouvement interdit
+                if (is_white and p in ("White","White_lady")) or \
+                (not is_white and p in ("Black","Black_lady")):
+                    return "Une dame ne peut pas passer au-dessus d'un pion allié"
+ 
+                # pion adverse → à capturer
+                if (is_white and p in ("Black","Black_lady")) or \
+                (not is_white and p in ("White","White_lady")):
+                    captured.append((cur_r, cur_c))
+ 
+                cur_r += step_r
+                cur_c += step_c
+ 
+            # --- appliquer le mouvement ---
+            board[r1][c1] = "vw" if (r1, c1) in white_positions else "vb"
+            board[r2][c2] = inv_piece_dic[piece]
+ 
+            # supprimer tous les pions capturés
+            for rr, cc in captured:
+                board[rr][cc] = "vw" if (rr, cc) in white_positions else "vb"
+            if self.blackwin(board):
+                self.winner="Black"
+                return "La partie est finie, aucun mouvement peut être réalisé"
+            if self.whitewin(board):
+                self.winner="White"
+                return "La partie est finie, aucun mouvement peut être réalisé"
+            self.switch_turn()
+            return board
+
         dr = r2 - r1
         dc = c2 - c1
- 
+        print("pion")
         # --- déplacement simple (1 diag)
         if abs(dr) == 1 and abs(dc) == 1:
             if piece == "White" and dr != -1:
@@ -284,17 +337,22 @@ class Game():
 
             # Déplacements
 
-            board[r1][c1] = self.get_empty_code(r1, c1) 
-            board[r2][c2] = inv_piece_dic.get(piece)
-            #board[r1][c1] = "vw" if (r1,c1) in white_positions else "vb" #Case de la où l'on vient devient vide
-            #board[r2][c2] = inv_piece_dic.get(piece) # Nouvelle case occupée par le pion
+            #board[r1][c1] = self.get_empty_code(r1, c1) 
+            #board[r2][c2] = inv_piece_dic.get(piece)
+            board[r1][c1] = "vw" if (r1,c1) in white_positions else "vb" #Case de la où l'on vient devient vide
+            board[r2][c2] = inv_piece_dic.get(piece) # Nouvelle case occupée par le pion
 
             self.promote_if_needed(r2, c2)  # Si la case d'arrivée est une case du bout du plateau"
-
+            if self.blackwin(board):
+                self.winner="Black"
+                return "La partie est finie, aucun mouvement peut être réalisé"
+            if self.whitewin(board):
+                self.winner="White"
+                return "La partie est finie, aucun mouvement peut être réalisé"
             self.switch_turn() # passer à l'autre joueur
 
             return board
-
+        
         # Déplacement avec capture d'un pion    
         if abs(dr) >= 2 or abs(dc) >= 2:  
 
@@ -350,7 +408,7 @@ class Game():
             return board
         else:
 
-            return None
+            return ("Déplacement invalide")
     def get_all_valid_moves(self, player_color):
         """Génère tous les coups possibles pour un joueur donné ("White" ou "Black").
         Retourne une liste de tuples : (r_start, c_start, r_end, c_end, is_capture)"""
