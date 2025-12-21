@@ -60,6 +60,10 @@ TUTO INSTALLATION :
     python gamebot.py
     Selon votre installation de Python, vous devrez peut-être utiliser python3 ou py au lieu de python.
 
+  -Pour l'affichage si vous n'utilisez pas notre token discord, il est fort probable que vous n'ayez pas les emojis.
+  Vous pourrez les trouvez dans le dossier piece dames et les ajouter en important le dossier sur l'espace developpeur de Discord dans emoji sur la gauche.
+  Ensuite il vous faudra remplacer dans le Programme gamebot.py(l.23) toute lesanciennes id par les nouvelles id qui vous seront données après l'importation
+
 
 COMMENT JOUER:
 Entrez la commande !dames dans le chat discord
