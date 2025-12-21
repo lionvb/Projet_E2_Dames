@@ -68,6 +68,7 @@ Pour cela, cliquez sur la difficulté qui vous intéresse.
 Ensuite le jeu de dames va s'afficher. 
 Faites !move (case de départ):(case d'arrivée) (de la forme !mvoe A3:B4)
 Et si vous voulez arretez une partie commencez mais mettre la partie sur la database, envoyer dasns le tchat !finish.
+Ainsi que !help pour toute question
 
 
 EXPLICATION DU CODE:
@@ -88,10 +89,39 @@ EXPLICATION DU CODE:
 
 
     -Fichier Game.py
-
+      -Structure du Code:
+         Plateau de jeu : Représenté par une matrice 10x10, chaque case contient des pièces (pions blancs, pions noirs, dames, ou cases vides).
+         Classe Board : Gère l'état du plateau et permet d'accéder aux pièces avec des méthodes comme get_piece() et set_piece().
+         Classe Game : Gère la logique du jeu : changement de tour, déplacements, captures, promotion des pions en dames, et vérification de la victoire.
+         IA : Utilise un modèle de langage pour suggérer des coups via la méthode llm_move().
+        
+      -Fonctionnalités Clés:
+         Déplacements des pièces selon les règles classiques des dames.
+         Captures obligatoires et multiples.
+         Promotion des pions en dames.
+         Détection du gagnant (lorsqu'un joueur n'a plus de pions).
 
  -Fichier Gamebot.py
-
+       - Commandes principales :
+           !dames : Lance une partie et permet de choisir l'adversaire.
+           !move A3:B4 : Effectue un mouvement sur le plateau (format : !move [Départ][Arrivée]).
+           !finish : Sauvegarde et termine la partie.
+           !helps : Affiche les instructions de base pour jouer.
+        
+       - Modes de jeu :
+           JCJ : Deux joueurs humains jouent l'un contre l'autre.
+           IA Facile : Affrontez une IA qui fait des mouvements aléatoires.
+           IA Moyen (LLM) : Affrontez une IA plus avancée utilisant un modèle de langage (LLM) pour décider de ses coups.
+        
+       - Comportement du jeu :
+          Le jeu vérifie à chaque tour si c'est au tour du joueur, et vous avertit si ce n'est pas votre tour.
+          Les joueurs peuvent jouer avec une IA ou avec d'autres joueurs en ligne via Discord.
+          L'IA "facile" joue aléatoirement, tandis que l'IA "moyenne" utilise une logique de mouvement avancée.
+        
+       - Structures principales :
+            GameSession : Gère l'état de la partie en cours, y compris le mode (JCJ ou IA) et les joueurs.
+            ChoixAdversaire : Interface utilisateur avec des boutons pour choisir le type d'adversaire (JCJ, IA Facile, IA Moyen).
+            DraughtsBot : L'IA qui utilise un modèle de langage pour jouer intelligemment contre un joueur.
 
  -Fichier Savegame.py
     
