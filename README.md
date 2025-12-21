@@ -25,17 +25,18 @@ TUTO INSTALLATION :
 
 
 -RECUP CLE API :
+    
     Créer une clé API :
     1. Se rendre sur : [Groq cloud](https://console.groq.com/keys)
     2. se connecter et cliquer sur le bouton "Créer une clé API"
     3. Lui donner un nom 
-    Stocker la clé crée:
-    set GROQ_API_KEY=key    pour y acceder sans le mettre en clair
-
+    4. Stocker la clé crée pour y acceder sans le mettre en clair:
+    set GROQ_API_KEY=key    
  
 
 
  -RECUP VOTRE CLE DISCORD
+    
     1) Aller sur le site web : [Discord developpers](https://discord.com/developers/applications)
     
     2) Cliquer sur "New application", Donnez lui un nom et cliquez sur create
@@ -70,8 +71,10 @@ Et si vous voulez arretez une partie commencez mais mettre la partie sur la data
 
 
 EXPLICATION DU CODE:
- -Fichier bot_llm_moyen_py
-    - API : Groq (Modèle de langage haute performance)
+ 
+   -Fichier bot_llm_moyen_py
+    
+    - API : Groq
     - Format de données : JSON
 
     - Prérequis :
@@ -84,13 +87,14 @@ EXPLICATION DU CODE:
         2. L'exécution (jouer_coup_ia) : Méthode faisant le pont entre l'instance du jeu et l'IA pour retourner le résultat du coup.
 
 
- -Fichier Game.py
+    -Fichier Game.py
 
 
  -Fichier Gamebot.py
 
 
  -Fichier Savegame.py
+    
     - Prérequis :
         L'installation de la bibliothèque pymongo est nécessaire.
     -Rôle:
@@ -121,6 +125,34 @@ EXPLICATION DU CODE:
 
 
 REPARTITION DU TRAVAIL
-Arthur
-Nils
-Victor
+   
+   
+   Arthur – Développement du moteur du jeu de dames (Intégralité du code du jeu de dame)
+    
+   - L’implémentation complète des règles officielles du jeu de dames
+      - Déplacements des pions
+      - Prises simples et multiples
+      - Gestion des dames
+      - Conditions de victoire et de fin de partie
+   - La gestion de l’état du plateau et des tours de jeu
+   - La validation des coups joués (coups légaux / illégaux)
+   - La création d’une base solide permettant l’intégration du jeu sur d’autres plateformes (comme Discord)
+    
+    
+   Victor – Intégration Discord et base de données
+    
+   - Le développement du bot Discord permettant de jouer au jeu de dames directement sur un serveur
+   - La gestion des commandes Discord (création de partie, jouer un coup, affichage du plateau, etc.)
+   - L’intégration de MongoDB pour :
+      - Sauvegarder les parties en cours
+      - Stocker les joueurs et leurs statistiques
+      - Permettre la reprise des parties
+   - La liaison entre le moteur du jeu et l’interface Discord
+    
+    
+   Nils – Algorithme de requêtes basé sur un LLM (Niveau moyen)
+    
+   - La conception d’un algorithme capable de formuler et gérer des requêtes
+   - L’utilisation d’un modèle de langage (LLM) pour analyser ou générer des réponses adaptées
+   - L’intégration de cet algorithme dans le projet afin d’apporter une dimension intelligente (aide, analyse ou interaction avancée)
+   - L’optimisation des requêtes pour obtenir des réponses cohérentes et exploitables
