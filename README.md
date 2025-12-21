@@ -8,7 +8,8 @@ TUTO INSTALLATION :
 
     python -m venv <name>
 
-    Remplacez <name> par le nom que vous souhaitez donner à votre environnement virtuel. Selon votre installation de Python, vous devrez peut-être utiliser python3 ou py au lieu de python.
+    Remplacez <name> par le nom que vous souhaitez donner à votre environnement virtuel. 
+    Selon votre installation de Python, vous devrez peut-être utiliser python3 ou py au lieu de python.
 
     2 Activer l'environnement virtuel
 
@@ -22,11 +23,13 @@ TUTO INSTALLATION :
 
     Cela installera toutes les bibliothèques Python listées dans le fichier requirements.txt dont vous aurez besoin pour déployer le bot de jeu de dames.
 
+
 -RECUP CLE API
  groq.com
 
+
  -RECUP VOTRE CLE DISCORD
-    1) Aller sur le site web : [text](https://discord.com/developers/applications)
+    1) Aller sur le site web : [Discord developpers](https://discord.com/developers/applications)
     
     2) Cliquer sur "New application", Donnez lui un nom et cliquez sur create
 
@@ -43,6 +46,7 @@ TUTO INSTALLATION :
 
     7) Copiez le lien du bot et collez le sur google puis choisissez votre serveur où vous êtes administrateur
 
+
  -LANCEMENT BOT DISCORD
   Dans l'environnment précedemment crée et tapez la commande : 
     python gamebot.py
@@ -56,6 +60,7 @@ Pour cela, cliquez sur la difficulté qui vous intéresse.
 Ensuite le jeu de dames va s'afficher. 
 Faites !move (case de départ):(case d'arrivée) (de la forme !mvoe A3:B4)
 Et si vous voulez arretez une partie commencez mais mettre la partie sur la database, envoyer dasns le tchat !finish.
+
 
 EXPLICATION DU CODE:
  -Fichier bot_llm_moyen_py
@@ -73,6 +78,33 @@ EXPLICATION DU CODE:
  -Fichier Game.py
  -Fichier Gamebot.py
  -Fichier Savegame.py
+    - Prérequis :
+        L'installation de la bibliothèque pymongo est nécessaire.
+    -Rôle:
+        Le fichier Savegame.py gère la sauvegarde des parties de jeu de dames dans une base de données MongoDB hébergée en ligne.
+        Il permet de conserver les informations importantes d’une partie : joueurs, coups joués, nombre de coups et vainqueur.
+        Description de la classe Partie_database
+
+        La classe Partie_database permet d’interagir avec la base de données.
+
+        Initialisation (__init__)
+        Connexion à la base MongoDB, création ou accès à la base Jeu_de_dames et à la collection Games.
+        Une nouvelle partie est automatiquement numérotée et les variables de stockage sont initialisées.
+
+        coups:
+        Ajoute un coup joué à l’historique et incrémente le nombre total de coups.
+
+        winner:
+        Définit le vainqueur de la partie une fois celle-ci terminée.
+
+        dict:
+        Regroupe toutes les informations de la partie dans un dictionnaire prêt à être envoyé à la base de données.
+
+        add_data:
+        Enregistre définitivement la partie dans MongoDB.
+
+        Conclusion
+        Ce fichier permet d’assurer la persistance des données du jeu en stockant les parties jouées, ce qui facilite le suivi et l’analyse des parties.
 
 
 REPARTITION DU TRAVAIL
