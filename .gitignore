@@ -1,10 +1,13 @@
 # Environnement virtuel
 venv/
 .env/
+groq-event/
+
 
 # Fichiers Python temporaires
 __pycache__/
 *.pyc
+.vscode
 
 # Fichiers sensibles
 config.json
