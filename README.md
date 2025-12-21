@@ -30,9 +30,8 @@ TUTO INSTALLATION :
     1. Se rendre sur : [Groq cloud](https://console.groq.com/keys)
     2. se connecter et cliquer sur le bouton "Créer une clé API"
     3. Lui donner un nom 
-    Stocker la clé crée:
-    set GROQ_API_KEY=key    pour y acceder sans le mettre en clair
-
+    Stocker la clé crée pour y acceder sans le mettre en clair:
+    set GROQ_API_KEY=key    
  
 
 
