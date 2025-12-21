@@ -25,6 +25,7 @@ TUTO INSTALLATION :
 
 
 -RECUP CLE API :
+    
     Créer une clé API :
     1. Se rendre sur : [Groq cloud](https://console.groq.com/keys)
     2. se connecter et cliquer sur le bouton "Créer une clé API"
@@ -36,6 +37,7 @@ TUTO INSTALLATION :
 
 
  -RECUP VOTRE CLE DISCORD
+    
     1) Aller sur le site web : [Discord developpers](https://discord.com/developers/applications)
     
     2) Cliquer sur "New application", Donnez lui un nom et cliquez sur create
