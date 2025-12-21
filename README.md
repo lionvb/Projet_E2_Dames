@@ -72,7 +72,7 @@ Pour cela, cliquez sur la difficulté qui vous intéresse.
 Ensuite le jeu de dames va s'afficher. 
 Faites !move (case de départ):(case d'arrivée) (de la forme !mvoe A3:B4)
 Et si vous voulez arretez une partie commencez mais mettre la partie sur la database, envoyer dasns le tchat !finish.
-Ainsi que !help pour toute question
+Ainsi que !helps pour toute question
 
 
 EXPLICATION DU CODE:
