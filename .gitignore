@@ -1,0 +1,11 @@
+# Environnement virtuel
+venv/
+.env/
+
+# Fichiers Python temporaires
+__pycache__/
+*.pyc
+
+# Fichiers sensibles
+config.json
+
