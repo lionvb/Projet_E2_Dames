@@ -125,6 +125,34 @@ EXPLICATION DU CODE:
 
 
 REPARTITION DU TRAVAIL
-Arthur
-Nils
-Victor
+   
+   
+   Arthur – Développement du moteur du jeu de dames (Intégralité du code du jeu de dame)
+    
+   - L’implémentation complète des règles officielles du jeu de dames
+      - Déplacements des pions
+      - Prises simples et multiples
+      - Gestion des dames
+      - Conditions de victoire et de fin de partie
+   - La gestion de l’état du plateau et des tours de jeu
+   - La validation des coups joués (coups légaux / illégaux)
+   - La création d’une base solide permettant l’intégration du jeu sur d’autres plateformes (comme Discord)
+    
+    
+   Victor – Intégration Discord et base de données
+    
+   - Le développement du bot Discord permettant de jouer au jeu de dames directement sur un serveur
+   - La gestion des commandes Discord (création de partie, jouer un coup, affichage du plateau, etc.)
+   - L’intégration de MongoDB pour :
+      - Sauvegarder les parties en cours
+      - Stocker les joueurs et leurs statistiques
+      - Permettre la reprise des parties
+   - La liaison entre le moteur du jeu et l’interface Discord
+    
+    
+   Nils – Algorithme de requêtes basé sur un LLM (Niveau moyen)
+    
+   - La conception d’un algorithme capable de formuler et gérer des requêtes
+   - L’utilisation d’un modèle de langage (LLM) pour analyser ou générer des réponses adaptées
+   - L’intégration de cet algorithme dans le projet afin d’apporter une dimension intelligente (aide, analyse ou interaction avancée)
+   - L’optimisation des requêtes pour obtenir des réponses cohérentes et exploitables
