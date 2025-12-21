@@ -24,8 +24,15 @@ TUTO INSTALLATION :
     Cela installera toutes les bibliothèques Python listées dans le fichier requirements.txt dont vous aurez besoin pour déployer le bot de jeu de dames.
 
 
--RECUP CLE API
- groq.com
+-RECUP CLE API :
+    Créer une clé API :
+    1. Se rendre sur : [Groq cloud](https://console.groq.com/keys)
+    2. se connecter et cliquer sur le bouton "Créer une clé API"
+    3. Lui donner un nom 
+    Stocker la clé crée:
+    set GROQ_API_KEY=key    pour y acceder sans le mettre en clair
+
+ 
 
 
  -RECUP VOTRE CLE DISCORD
@@ -75,8 +82,14 @@ EXPLICATION DU CODE:
         1. L'initialisation (__init__) : Mise en place du client API en récupèrant automatiquement la clé d'API depuis les variables d'environnement et définition du prompt système contenant les règles métier.
 
         2. L'exécution (jouer_coup_ia) : Méthode faisant le pont entre l'instance du jeu et l'IA pour retourner le résultat du coup.
+
+
  -Fichier Game.py
+
+
  -Fichier Gamebot.py
+
+
  -Fichier Savegame.py
     - Prérequis :
         L'installation de la bibliothèque pymongo est nécessaire.
