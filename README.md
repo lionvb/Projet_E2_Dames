@@ -1,23 +1,23 @@
 Jeu de DAMES avec Discord
 
 TUTO INSTALLATION :
- -Installer les dépendances
- Pour installer les modules et pouvoir les utiliser avec le code.
+ 
+    Pour installer les modules et pouvoir les utiliser avec le code.
 
-    1 Créer un environnment virtuel
+    1. Créer un environnment virtuel
 
     python -m venv <name>
 
     Remplacez <name> par le nom que vous souhaitez donner à votre environnement virtuel. 
     Selon votre installation de Python, vous devrez peut-être utiliser python3 ou py au lieu de python.
 
-    2 Activer l'environnement virtuel
+    2. Activer l'environnement virtuel
 
     .\<name>\Scripts\activate
 
     Lorsque l'environnement virtuel est activé, vous devriez voir le nom de l'environnement en début de ligne dans votre terminal.
 
-    3 Installer les dépendances
+    3. Installer les dépendances
 
     Tapez : pip install -r requirements.txt
 
