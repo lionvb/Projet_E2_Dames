@@ -71,8 +71,10 @@ Et si vous voulez arretez une partie commencez mais mettre la partie sur la data
 
 
 EXPLICATION DU CODE:
- -Fichier bot_llm_moyen_py
-    - API : Groq (Modèle de langage haute performance)
+ 
+   -Fichier bot_llm_moyen_py
+    
+    - API : Groq
     - Format de données : JSON
 
     - Prérequis :
@@ -85,13 +87,14 @@ EXPLICATION DU CODE:
         2. L'exécution (jouer_coup_ia) : Méthode faisant le pont entre l'instance du jeu et l'IA pour retourner le résultat du coup.
 
 
- -Fichier Game.py
+    -Fichier Game.py
 
 
  -Fichier Gamebot.py
 
 
  -Fichier Savegame.py
+    
     - Prérequis :
         L'installation de la bibliothèque pymongo est nécessaire.
     -Rôle:
