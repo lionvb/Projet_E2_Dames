@@ -1,5 +1,5 @@
 - Langage : Python 3
-- API : Groq (Modèle de langage haute performance)
+- API : Groq 
 - Format de données : JSON
 
 - Prérequis :
