@@ -53,7 +53,7 @@ class Board():
             ["vw","pw","vw","pw","vw","pw","vw","pw","vw","pw"],\
             ["pw","vw","pw","vw","pw","vw","pw","vw","pw","vw"],\
             ["vw","pw","vw","pw","vw","pw","vw","pw","vw","pw"]]#Matrice pour vrai jeu
-        self.matrice=[["vb","vw","vb","vw","vb","vw","vb","vw","vb","vw"],\
+        """self.matrice=[["vb","vw","vb","vw","vb","vw","vb","vw","vb","vw"],\
             ["vw","vb","vw","vb","vw","vb","vw","vb","vw","vb"],\
             ["vb","vw","vb","vw","vb","vw","vb","vw","vb","vw"],\
             ["vw","vb","vw","vb","vw","vb","vw","vb","vw","vb"],\
@@ -62,7 +62,7 @@ class Board():
             ["vb","vw","vb","vw","pw","vw","vb","vw","vb","vw"],\
             ["vw","vb","vw","pb","vw","vb","vw","vb","vw","vb"],\
             ["vb","vw","pw","vw","vb","vw","vb","vw","vb","vw"],\
-            ["vw","vb","vw","vb","vw","vb","vw","vb","vw","vb"]]#matrice pour promotion et win
+            ["vw","vb","vw","vb","vw","vb","vw","vb","vw","vb"]]"""#matrice pour promotion et win
     def get_piece(self, r, c):
         """Retourne le type de pièce (White, Black, White_lady, etc.)
         présente à la position (r, c)."""
@@ -299,7 +299,6 @@ class Game():
         """
         board = self.board.matrice
         piece = piece_dic[board[r1][c1]]
- 
         # Vérification des potentielles erreurs
         if piece in ("Vide_brown","Vide_White"):
             return "pas de pièce sur la case"
@@ -369,7 +368,7 @@ class Game():
         #Déplacement d'un pion
         dr = r2 - r1
         dc = c2 - c1
-        print("pion")
+
         #Vérification des erreurs        
         if abs(dr) == 1 and abs(dc) == 1:
             if piece == "White" and dr != -1:
@@ -531,6 +530,8 @@ class Game():
         if groq_client is None:
             print("Client Groq non initialisé. Impossible de demander le coup.")
             return "Échec de l'obtention du coup (Client Groq absent)"
+        if self.winner!=None:
+            return "La partie est finie, aucun mouvement peut être réalisé"
 
         player_color = "Blanc (W/Wk)" if self.current_player == "White" else "Noir (B/Bk)"
         
@@ -557,11 +558,10 @@ class Game():
             # ... (Le reste du code de parsing et d'exécution reste le même) ...
             response_text = response.choices[0].message.content
             move_data = json.loads(response_text)
-            print(move_data)
-            r1 = move_data.get('r1')+1
-            c1 = move_data.get('c1')+1
-            r2 = move_data.get('r2')+1
-            c2 = move_data.get('c2')+1
+            r1 = int(move_data.get('r1'))
+            c1 = int(move_data.get('c1'))
+            r2 = int(move_data.get('r2'))
+            c2 = int(move_data.get('c2'))
             
             if not all(isinstance(coord, int) for coord in [r1, c1, r2, c2]):
                 raise ValueError(f"Le format JSON de l'IA est incorrect ou incomplet: {response_text}")
@@ -569,15 +569,17 @@ class Game():
             print(f"L'IA Groq suggère le coup : ({r1}, {c1}) -> ({r2}, {c2})")
 
             try:
+                piece_at_start=self.board.matrice[r1][c1]
                 piece_at_dest = self.board.matrice[r2][c2]
-                print(f"DEBUG: Contenu réel de la case d'arrivée ({r2}, {c2}): {piece_at_dest}")
+                print(f"DEBUG: Contenu réel de la case d'arrivée ({r2}, {c2}): {piece_at_dest},{piece_at_start}")
             except (IndexError, TypeError):
                 print("DEBUG: Coordonnées d'arrivée hors limites ou invalides.")
             
-            result = self.moves(r1, c1, r2, c2)
+            #result = self.moves(r1, c1, r2, c2)
             
-            print(f"Résultat de l'exécution: {result}")
-            return result
+            #print(f"Résultat de l'exécution: {result}")
+            return r1,c1,r2,c2
+            
         
         except Exception as e:
             print(f"Erreur lors de l'appel ou du traitement de l'IA Groq : {e}")

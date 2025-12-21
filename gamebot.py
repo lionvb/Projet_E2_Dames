@@ -1,5 +1,6 @@
 import discord
 import random
+import os
 from discord import Embed
 from discord.ext import commands
 from game import Game,Board
@@ -7,7 +8,7 @@ from savegame import Partie_database
 from bot_moyen_LLM import DraughtsBot
 
 #Token bot discord
-TOKEN="MTQzODE5ODc0MTQ5NTU3ODY4NA.Gaa3Ix.wWwMdUjOnm9Ft-sJNmYE0sol0CcewgTks3FeII"
+TOKEN = os.getenv("DISCORD_TOKEN")
 # Définir les intentions
 intents = discord.Intents.default()
 intents.message_content = True
@@ -49,6 +50,8 @@ class ChoixAdversaire(discord.ui.View):
             players["Black"]=player2.name
         else:
             players["Black"]=f"IA {difficulty}"
+            """if difficulty=="moyen":
+                players["Black"],players["White"]=players["White"],players["Black"]"""
         print(players)
         active_games[interaction.channel_id]=GameSession(nouvelle_partie,mode,players,difficulty,ia=ia)
         embed = discord.Embed(title="Partie Lancée !", color=discord.Color.green())
@@ -89,12 +92,7 @@ class ChoixAdversaire(discord.ui.View):
         await interaction.response.edit_message(view=self)
         await self.start_game(interaction, "IA", difficulty="moyen",player1=interaction.user,ia=ia_moyen)
 
-    @discord.ui.button(label="IA difficile", style=discord.ButtonStyle.primary)
-    async def ia_difficile(self, interaction: discord.Interaction, button: discord.ui.Button):
-        for item in self.children:
-                item.disabled = True
-        await interaction.response.edit_message(view=self)
-        await self.start_game(interaction, "IA", difficulty="difficile")        
+         
 
 def embed_aff(msg,player_tour,player_tour_name):
     embed = Embed(title="Plateau de jeu", description=msg)
@@ -150,29 +148,26 @@ async def play_ai_facile(ctx,channel, session):
 
 async def play_ai_moyen(ctx,channel, session):
     """Gère le tour de l'IA moyen """
-    game = session.game
+    games = session.game
     difficulty = session.difficulty
-    """possibility = game.get_all_valid_moves("Black") # pas besoin
-    if not possibility:
-        await channel.send("L'IA est bloquée !")
-        return
-    move_tuple = random.choice(possibility)#a modif avec ll move
-    r1, c1, r2, c2, _ = move_tuple"""#a modif
-    game.llm_move(session.ia.client,session.ia.system_prompt)
-    """try:
-        result=game.moves(r1, c1, r2, c2)
-        session.database.coups(f"{inv_lettre_to_chiffre[c1+1]}{r1+1}:{inv_lettre_to_chiffre[c2+1]}{r2+1}")
+    try:
+        await channel.send(f"-> Consultation de l'IA Groq pour le joueur {games.current_player}...")
+        r1, c1, r2, c2=games.llm_move(session.ia.client,session.ia.system_prompt)
+        print(r1, c1, r2, c2)
+        result=games.moves(r1, c1, r2, c2)
+        print(games.board.matrice)
+        session.database.coups(f"{inv_lettre_to_chiffre[c1]}{r1}:{inv_lettre_to_chiffre[c2]}{r2}")
         
         # 5. On affiche le message et le plateau
-        await channel.send(f"L'IA a joué : {inv_lettre_to_chiffre[c1+1]}{r1+1} vers {inv_lettre_to_chiffre[c2+1]}{r2+1}")
+        await channel.send(f"L'IA LLM a joué : {inv_lettre_to_chiffre[c1]}{r1} vers {inv_lettre_to_chiffre[c2]}{r2}")
         
         # (Assure-toi d'avoir importé display_board ou qu'elle soit accessible)
-        await display_board(channel, game)
+        await display_board(channel, games)
         if result == "La partie est finie, aucun mouvement peut être réalisé":
             await finish(ctx)
     except Exception as e:
         print(f"Erreur IA : {e}")
-        await channel.send("l'IA a essayé un coup interdit.")"""
+        await channel.send("l'IA a essayé un coup interdit.")
 
 @bot.command()
 async def move(ctx,*,txt:str):
@@ -222,5 +217,13 @@ async def finish(ctx):
         del active_games[ctx.channel.id] # On supprime la partie
         await ctx.send(f"Partie sauvegardée et terminée.\n {session.players[session.game.winner]} a gagné")
     else: await ctx.send("Pas de partie à finir")
+
+@bot.command()
+async def helps(ctx):
+    await ctx.send("Voici l'aide :")
+    await ctx.send("!dames pour initialiser le jeu et lancer la partie en choisissant l'adversaire voulu")
+    await ctx.send("Après il faut saisir !move déplacement sous la forme (!move A3:B2)")
+    await ctx.send("A chaque fois qu'il est écrit que c'est à votre tour il faut le !move")
+    await ctx.send("!finsih permet de finir la partie en la sauvegardant même si elle n'est pas finie(pas de gagnant)")
 
 bot.run(TOKEN)
