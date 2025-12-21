@@ -106,9 +106,10 @@ EXPLICATION DU CODE:
          Détection du gagnant (lorsqu'un joueur n'a plus de pions).
 
  -Fichier Gamebot.py
+       
        - Commandes principales :
            !dames : Lance une partie et permet de choisir l'adversaire.
-           !move A3:B4 : Effectue un mouvement sur le plateau (format : !move [Départ][Arrivée]).
+           !move A3:B4 : Effectue un mouvement sur le plateau (format :                !move [Départ][Arrivée]).
            !finish : Sauvegarde et termine la partie.
            !helps : Affiche les instructions de base pour jouer.
         
