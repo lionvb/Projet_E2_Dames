@@ -1,8 +1,23 @@
 import json
+#game.py
+"""Fichier principal contenant la logique du jeu de dames:
+-Les contenants du jeu
+-La classe Board
+-La classe game"""
 
-
+#Matrice qui permet de transformer une colonne en index 
 column={"A":0,"B":1,"C":2,"D":3,"E":4,"F":5,"G":6,"H":7,"I":8,"J":9}
-piece_dic={"pw":"White","dw":"White_lady","pb":"Black","db":"Black_lady","vw":"Vide_White","vb":"Vide_brown"}
+#dictionnaire reliant les codes internes aux type de pieces
+ 
+#Dictionnaire reliant les codes internes aux types de pièces
+piece_dic = {"pw":"White", # pion blanc
+             "dw":"White_lady", # dame blanche
+             "pb":"Black", # pion noir
+             "db":"Black_lady", # dame noire
+             "vw":"Vide_White", # case claire vide
+             "vb":"Vide_brown" # case foncée vide
+             }
+# Dictionnaire inverse pour convertir un type de pièce en code interne
 inv_piece_dic={'White': 'pw', 'White_lady': 'dw', 'Black': 'pb', 'Black_lady': 'db', 'Vide_White': 'vw', 'Vide_brown': 'vb'}
  
 # cases blanches initiales 
@@ -22,8 +37,11 @@ brown_positions = [(r,c) for r in range(10) for c in range(10) if (r,c) not in w
  
  
 class Board():
+    """Classe représentant le plateau de jeu.
+    Elle contient la matrice 10x10 et les méthodes d'accès aux pièces."""
     def __init__(self):
-        # position de départ standard
+        """Initialise le plateau avec une configuration prédéfinie.
+        Chaque case contient un code de pièce (pw, pb, vw, vb, etc.)."""
         self.matrice= [
             ["pb","vw","pb","vw","pb","vw","pb","vw","pb","vw"],\
             ["vw","pb","vw","pb","vw","pb","vw","pb","vw","pb"],\
@@ -46,10 +64,13 @@ class Board():
             ["vb","vw","pw","vw","vb","vw","vb","vw","vb","vw"],\
             ["vw","vb","vw","vb","vw","vb","vw","vb","vw","vb"]]#matrice pour promotion et win
     def get_piece(self, r, c):
+        """Retourne le type de pièce (White, Black, White_lady, etc.)
+        présente à la position (r, c)."""
         return piece_dic[self.matrice[r][c]]
  
     def set_piece(self, r, c, value):
-        # value attendu : "White", "Black", "White_lady", "Black_lady", "Vide_White" ou "Vide_brown"
+        """Place une pièce donnée (value) à la position (r, c)
+        en utilisant le dictionnaire inverse."""
         self.matrice[r][c] = inv_piece_dic[value]
 
     def __str__(self):
@@ -73,21 +94,35 @@ class Board():
         return board_str.strip() # Renvoie la chaîne de caractères formatée
 
 class Game():
+    """Classe principale gérant le déroulement de la partie :
+    - tour du joueur
+    - déplacements
+    - promotions
+    - captures"""
     def __init__(self):
+        """Initialise une nouvelle partie :
+        - plateau
+        - joueur courant
+        - état de la partie"""
         self.board = Board()
         self.current_player = "White"
         self.winner = None
         self.state = "Started"
  
     def is_started(self):
+        """Indique si la partie est en cours."""
         return self.state == "Started"
  
     def switch_turn(self):
+        """Change le joueur courant (White ↔ Black)."""
         if self.current_player == "White":
             self.current_player = "Black"
         else:
             self.current_player = "White"
+
     def blackwin(self,m):
+        """Vérifie si le joueur noir a gagné
+        (plus aucun pion blanc sur le plateau)."""
         for i in m:
             for j in i:
                 if j=="pw"or j=="dw":
@@ -95,6 +130,8 @@ class Game():
         return True
     
     def whitewin(self,m):
+        """Vérifie si le joueur blanc a gagné
+        (plus aucun pion noir sur le plateau)."""
         for i in m:
             for j in i:
                 if j=="pb"or j=="db":
@@ -115,6 +152,9 @@ class Game():
     
 
     def get_possible_captures(self, r, c): 
+        """Calcule toutes les captures possibles pour une pièce
+        située en (r, c).
+        Retourne une liste de coups possibles."""
         print(r,c)
         # Va retourner toutes les captures possibles sous la forme
         # [(r_arrivée, c_arrivée, r_mangé, c_mangé), ...]
@@ -138,7 +178,7 @@ class Game():
             # Position d'arrivée avec capture -> case située 2 cases plus loin
             jump_r = r + 2*dr
             jump_c = c + 2*dc
-
+            #Vérif des limites du plateau
             if  not (0 <= enemy_r < 10 and 0 <= enemy_c < 10):
                 continue
             if  not (0 <= jump_r < 10 and 0 <= jump_c < 10):
@@ -159,7 +199,8 @@ class Game():
         return moves
 
     def promote_if_needed(self, r, c):
-        """Promotion automatique"""
+        """Transforme un pion en dame si celui-ci atteint
+        la dernière ligne adverse."""
         piece = self.board.get_piece(r, c)
         if piece == "White" and r == 0:
             self.board.set_piece(r, c, "White_lady")
@@ -193,18 +234,18 @@ class Game():
                 enemy_c = c + dc
                 landing_r = r + 2*dr
                 landing_c = c + 2*dc
- 
+                #Vérif des limites du pkateau
                 if not (0 <= enemy_r < 10 and 0 <= enemy_c < 10 and 0 <= landing_r < 10 and 0 <= landing_c < 10):
                     continue
  
                 enemy_piece = piece_dic[board[enemy_r][enemy_c]]
                 landing_piece = piece_dic[board[landing_r][landing_c]]
- 
+                #vérifie si la pièce adjacente est ennemie
                 if is_white and enemy_piece not in ("Black", "Black_lady"):
                     continue
                 if (not is_white) and enemy_piece not in ("White", "White_lady"):
                     continue
- 
+                #Vérfie si la case d'arrivée est vie
                 if landing_piece in ("Vide_White", "Vide_brown"):
                     moves.append((landing_r, landing_c, enemy_r, enemy_c))
                 continue
@@ -259,7 +300,7 @@ class Game():
         board = self.board.matrice
         piece = piece_dic[board[r1][c1]]
  
-        # validations de base
+        # Vérification des potentielles erreurs
         if piece in ("Vide_brown","Vide_White"):
             return "pas de pièce sur la case"
  
@@ -274,8 +315,8 @@ class Game():
 
         is_lady = piece in ("White_lady", "Black_lady")
         is_white = piece in ("White", "White_lady")
- 
- 
+
+        #Déplacement de la dame
         if is_lady:
             print("lady")
             dr = r2 - r1
@@ -325,10 +366,11 @@ class Game():
             self.switch_turn()
             return board
 
+        #Déplacement d'un pion
         dr = r2 - r1
         dc = c2 - c1
         print("pion")
-        # --- déplacement simple (1 diag)
+        #Vérification des erreurs        
         if abs(dr) == 1 and abs(dc) == 1:
             if piece == "White" and dr != -1:
                 return "Les pions blancs vont vers le haut du plateau sauf si vous êtes une dame"
@@ -409,6 +451,14 @@ class Game():
         else:
 
             return ("Déplacement invalide")
+     
+    def print_board(self):
+        """
+        Affiche le plateau en version lisible (noms des pièces).
+        """
+        for row in self.board.matrice:
+            print([piece_dic.get(cell, cell) for cell in row])
+
     def get_all_valid_moves(self, player_color):
         """Génère tous les coups possibles pour un joueur donné ("White" ou "Black").
         Retourne une liste de tuples : (r_start, c_start, r_end, c_end, is_capture)"""
@@ -508,10 +558,10 @@ class Game():
             response_text = response.choices[0].message.content
             move_data = json.loads(response_text)
             print(move_data)
-            r1 = move_data.get('r1')
-            c1 = move_data.get('c1')
-            r2 = move_data.get('r2')
-            c2 = move_data.get('c2')
+            r1 = move_data.get('r1')+1
+            c1 = move_data.get('c1')+1
+            r2 = move_data.get('r2')+1
+            c2 = move_data.get('c2')+1
             
             if not all(isinstance(coord, int) for coord in [r1, c1, r2, c2]):
                 raise ValueError(f"Le format JSON de l'IA est incorrect ou incomplet: {response_text}")
